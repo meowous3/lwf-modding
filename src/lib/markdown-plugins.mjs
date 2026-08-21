@@ -1,3 +1,5 @@
+import GithubSlugger from 'github-slugger';
+
 // Guide Markdown is authored to read correctly on github.com, where a sibling guide is
 // `reference.md`. On the site the same guide lives at /guides/reference/, so the hrefs are
 // rewritten at build time rather than the prose being written for one reader and broken
@@ -24,14 +26,6 @@ export function guideLinks(base) {
   };
 }
 
-function slugify(text) {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
-
 // @astrojs/markdown-satteri runs every user hastPlugin BEFORE its own built-in
 // heading-id plugin (see createSatteriMarkdownProcessor: userHastPlugins are
 // pushed ahead of createHeadingIdsPlugin()), so `node.properties.id` is not yet
@@ -39,19 +33,35 @@ function slugify(text) {
 // emitting them "natively". This plugin therefore computes the id itself when
 // missing; the built-in plugin that runs afterwards sees a string id already
 // present and leaves it alone, so there is still exactly one id per heading.
+//
+// The id is generated with `github-slugger` — the exact package Astro's own
+// heading-id plugin uses — rather than a hand-rolled regex, so the id this
+// plugin assigns can never diverge from what Astro would have assigned itself
+// (e.g. a hand-rolled `[^a-z0-9]+` regex turns an apostrophe into a hyphen;
+// github-slugger drops it with no separator: "Witch's" -> "witchs", not
+// "witch-s").
+//
+// `slugger` is rebuilt in `before`, which satteri runs once per document
+// ahead of this plugin's visitors (see node_modules/satteri/dist/hast/hast-
+// visitor.d.ts). The plugin object itself is created once, at astro.config.mjs
+// load time, and reused across every file in the build — without this reset,
+// GithubSlugger's own de-duplication ("Architecture" -> "architecture" the
+// first time it's seen, "architecture-1" the next) would carry over between
+// unrelated guides, so a heading unique within its own document could end up
+// with a suffixed id there instead of the plain one.
 export function headingAnchors() {
-  const seen = new Map();
+  let slugger = new GithubSlugger();
   return {
     name: 'heading-anchors',
+    before() {
+      slugger = new GithubSlugger();
+    },
     element: {
       filter: ['h2', 'h3'],
       visit(node, ctx) {
         let id = node.properties?.id;
         if (typeof id !== 'string' || !id) {
-          const base = slugify(ctx.textContent(node)) || 'section';
-          const count = seen.get(base) ?? 0;
-          seen.set(base, count + 1);
-          id = count === 0 ? base : `${base}-${count}`;
+          id = slugger.slug(ctx.textContent(node));
         }
         return {
           ...node,
