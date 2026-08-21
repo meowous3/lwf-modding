@@ -174,3 +174,115 @@
 .prose .anchor:focus-visible {
   opacity: 0.6;
 }
+
+/* --- Platform tabs ------------------------------------------------------ */
+
+/* A tab group is one plaque with a rail across its top, so it is the same
+   object as a code block wearing the same nav the site header wears. The
+   <pre> inside gives up its own plaque — background, shadow, margin — and
+   becomes the body of this one. */
+
+.prose .tabs {
+  position: relative;
+  margin: 1.5rem 0;
+  background: var(--surface);
+  color: var(--ink-inverse);
+  border-radius: var(--radius);
+  box-shadow:
+    inset 0 1px 0 var(--surface-lip),
+    0 0 0 1px var(--plaque-ring),
+    var(--plaque) var(--plaque) 0 var(--surface-edge);
+}
+
+.prose .tabs-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem;
+  padding: 0.3rem 0.35rem;
+  border-bottom: 1px solid var(--surface-lip);
+}
+
+/* The control is a real radio group: keyboard, screen reader and back-button
+   behaviour come from the browser. It is hidden rather than removed so the
+   label still drives it, and the focus ring is drawn on the label instead. */
+.prose .tabs-radio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.prose .tabs-tab {
+  font-family: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 7px;
+  color: var(--ink-on-surface-muted);
+  cursor: pointer;
+  user-select: none;
+}
+.prose .tabs-tab:hover {
+  color: var(--ink-inverse);
+  background: var(--surface-lip);
+}
+
+/* Ember on this near-black plaque is the active state, not a focus ring; the
+   ring has to stay legible against it, so it is the plaque's own gold. */
+.prose .tabs-radio:focus-visible + .tabs-tab {
+  outline: 2px solid var(--gold-on-surface);
+  outline-offset: 1px;
+}
+
+.prose .tabs-pane > * {
+  margin: 0.85rem 1.15rem;
+}
+
+.prose .tabs-pane pre {
+  margin: 0;
+  background: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  box-shadow: none;
+}
+
+/* The pane names itself for the reader who gets no stylesheet: with these
+   rules absent every pane is visible, each under its own heading. */
+.prose .tabs-pane-name {
+  display: none;
+}
+
+/* Which pane shows is a document-wide choice, so every group on the page
+   answers to whichever radio is checked — pick Windows once and the page is
+   a Windows page. `:root:has()` is the whole mechanism; where it does not
+   apply, nothing is hidden and the reader sees both panes rather than an
+   empty box.
+
+   One pair of rules per tab key, and `.tabs:has()` scopes the first to groups
+   that actually offer that key: a group without it keeps all its panes
+   instead of hiding them all. Keys come from the bold label above a pane —
+   add a pair here and to TAB_KEYS in src/lib/markdown-plugins.mjs to
+   introduce a new one. */
+
+:root:has(.tabs-radio[value='windows']:checked)
+  .tabs:has(.tabs-radio[value='windows'])
+  .tabs-pane:not([data-tab='windows']) {
+  display: none;
+}
+:root:has(.tabs-radio[value='windows']:checked) .tabs-tab[data-tab='windows'] {
+  color: var(--ink-inverse);
+  background: var(--ember-fill);
+  box-shadow: inset 0 0 0 1px var(--ember);
+}
+
+:root:has(.tabs-radio[value='linux-macos']:checked)
+  .tabs:has(.tabs-radio[value='linux-macos'])
+  .tabs-pane:not([data-tab='linux-macos']) {
+  display: none;
+}
+:root:has(.tabs-radio[value='linux-macos']:checked) .tabs-tab[data-tab='linux-macos'] {
+  color: var(--ink-inverse);
+  background: var(--ember-fill);
+  box-shadow: inset 0 0 0 1px var(--ember);
+}

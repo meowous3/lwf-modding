@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { slug as ghSlug } from 'github-slugger';
-import { guideLinks, headingAnchors, mediaPaths } from '../src/lib/markdown-plugins.mjs';
+import { guideLinks, headingAnchors, mediaPaths, tabGroups } from '../src/lib/markdown-plugins.mjs';
 
 const visit = guideLinks('/lwf-modding').element.visit;
 const anchor = (href) => ({ type: 'element', tagName: 'a', properties: { href }, children: [] });
@@ -95,4 +95,76 @@ test('leaves a relative image src alone', () => {
 
 test('is safe to run twice', () => {
   assert.equal(media(img('/lwf-modding/media/shot.png')), undefined);
+});
+
+// --- Platform tabs ---------------------------------------------------------
+//
+// A `:::tabs` group is split on its bold-only paragraphs: each one starts a
+// pane and names its tab. Everything else in the group belongs to the pane
+// above it.
+const el = (tagName, properties, children = []) => ({ type: 'element', tagName, properties, children });
+const marker = (label) => el('p', {}, [el('strong', {}, [{ type: 'text', value: label }])]);
+const group = (...children) => el('lwf-tabs', { group: 'platform' }, children);
+const textContent = (node) =>
+  node.type === 'text' ? node.value : (node.children ?? []).map(textContent).join('');
+const tabsCtx = () => {
+  const reports = [];
+  return { reports, ctx: { textContent, report: (r) => reports.push(r) } };
+};
+const run = (node) => {
+  const plugin = tabGroups();
+  const { ctx, reports } = tabsCtx();
+  plugin.before();
+  return { out: plugin.element.visit(node, ctx), reports };
+};
+
+test('a tab group becomes one pane per bold marker, keeping the content under it', () => {
+  const { out, reports } = run(
+    group(marker('Windows'), el('pre', { 'data-language': 'powershell' }),
+          marker('Linux / macOS'), el('pre', { 'data-language': 'bash' })),
+  );
+  assert.deepEqual(reports, []);
+  const panes = out.children.filter((c) => c.properties.class === 'tabs-pane');
+  assert.deepEqual(
+    panes.map((p) => p.properties['data-tab']),
+    ['windows', 'linux-macos'],
+    'the tab key is the slug of the label above the pane',
+  );
+  // The pane keeps the highlighted <pre> it was authored with, and names
+  // itself for the reader whose stylesheet never arrives.
+  assert.deepEqual(
+    panes.map((p) => p.children.map((c) => c.tagName)),
+    [['p', 'pre'], ['p', 'pre']],
+  );
+  assert.equal(panes[0].children[1].properties['data-language'], 'powershell');
+  assert.equal(panes[1].children[1].properties['data-language'], 'bash');
+});
+
+test('every tab group on a page drives one radio group, so selection syncs', () => {
+  const plugin = tabGroups();
+  const { ctx } = tabsCtx();
+  plugin.before();
+  const one = plugin.element.visit(group(marker('Windows'), el('pre', {}), marker('Linux / macOS'), el('pre', {})), ctx);
+  const two = plugin.element.visit(group(marker('Windows'), el('pre', {}), marker('Linux / macOS'), el('pre', {})), ctx);
+  const radios = (out) => out.children[0].children.filter((c) => c.tagName === 'input');
+  const names = new Set([...radios(one), ...radios(two)].map((r) => r.properties.name));
+  assert.equal(names.size, 1, 'two groups on a page must share one radio name');
+  // Ids may not: they are what each label points at.
+  const ids = [...radios(one), ...radios(two)].map((r) => r.properties.id);
+  assert.equal(new Set(ids).size, ids.length, 'duplicate radio ids on one page');
+});
+
+test('a group with fewer than two markers is reported and left as prose', () => {
+  const { out, reports } = run(group(marker('Windows'), el('pre', {})));
+  assert.equal(reports.length, 1);
+  assert.equal(reports[0].severity, 'error');
+  // The content survives: an author mistake must not silently delete a command.
+  assert.equal(out.tagName, 'div');
+  assert.equal(out.children.length, 2);
+});
+
+test('a tab key with no rule pair in the stylesheet is a build error', () => {
+  const { reports } = run(group(marker('Windows'), el('pre', {}), marker('Haiku'), el('pre', {})));
+  assert.equal(reports.length, 1);
+  assert.match(reports[0].message, /haiku/);
 });

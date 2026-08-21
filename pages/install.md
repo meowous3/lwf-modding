@@ -36,9 +36,21 @@ Without it BepInEx never loads, and nothing reports an error — the game just r
 Launch it, reach the title screen, quit. This creates `BepInEx/plugins`, which has to exist
 before you can install anything. To confirm BepInEx loaded:
 
+:::tabs
+
+**Windows**
+
+```powershell
+Select-String "Chainloader started" "<game>\BepInEx\LogOutput.log"
+```
+
+**Linux / macOS**
+
 ```bash
 grep "Chainloader started" "<game>/BepInEx/LogOutput.log"
 ```
+
+:::
 
 ## 3. Install the mod
 

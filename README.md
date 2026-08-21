@@ -21,6 +21,25 @@ A mod is a Markdown file in [`mods/`](mods); a guide is one in [`guides/`](guide
 plain frontmatter plus prose — see an existing file. Download links resolve to each repo's
 latest release automatically, so publishing a release is enough.
 
+A command that differs per platform goes in a tab group, which the site renders as one
+switchable block — pick Windows once and every group on the page follows:
+
+    :::tabs
+
+    **Windows**
+
+    ```powershell
+    Select-String "Chainloader started" "<game>\BepInEx\LogOutput.log"
+    ```
+
+    **Linux / macOS**
+
+    ```bash
+    grep "Chainloader started" "<game>/BepInEx/LogOutput.log"
+    ```
+
+    :::
+
 ```bash
 npm install
 npm run dev     # local preview

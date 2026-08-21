@@ -115,3 +115,204 @@ export function headingAnchors() {
     },
   };
 }
+
+/* --- Platform tabs -------------------------------------------------------
+ *
+ * A tab group is authored as a container directive holding one bold-only
+ * paragraph per pane:
+ *
+ *     :::tabs
+ *
+ *     **Windows**
+ *
+ *     ```powershell
+ *     Select-String "Chainloader started" "<game>\BepInEx\LogOutput.log"
+ *     ```
+ *
+ *     **Linux / macOS**
+ *
+ *     ```bash
+ *     grep "Chainloader started" "<game>/BepInEx/LogOutput.log"
+ *     ```
+ *
+ *     :::
+ *
+ * The marker is a plain `**bold**` paragraph rather than a nested directive
+ * because these files are read on github.com, which knows nothing about
+ * `:::`. There it degrades to a bold heading over each code block — the two
+ * bare `:::` lines are the only sigils a GitHub reader sees, and no content
+ * is lost or reordered.
+ *
+ * Two plugins, one feature: directives are an MDAST concept and are dropped
+ * before HAST unless a plugin claims them, so `tabsDirective` (MDAST) keeps
+ * the node alive as a placeholder element and `tabGroups` (HAST) turns it
+ * into the real control — by which point Astro's highlighter has already
+ * turned the fences inside it into <pre> trees, so a pane keeps its
+ * highlighting for free.
+ */
+
+const TABS_TAG = 'lwf-tabs';
+
+// Tab keys are the values the stylesheet switches on. Each key needs a rule
+// pair in the "Tabs" section of src/styles/prose.css; a key with no pair
+// would render every pane of its group at once, so an unknown one is a build
+// error rather than a silent mis-render.
+export const TAB_KEYS = ['windows', 'linux-macos'];
+
+const tabKey = (label) =>
+  label
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+export function tabsDirective() {
+  return {
+    name: 'tabs-directive',
+    containerDirective(node, ctx) {
+      if (node.name !== 'tabs') {
+        // Every other name is unclaimed. Rendering it as a plain div keeps the
+        // prose inside it on the page instead of dropping it silently.
+        ctx.report({
+          message: `Unknown container directive :::${node.name}. Only :::tabs is handled.`,
+          node,
+          severity: 'warning',
+        });
+        ctx.setProperty(node, 'data', { hName: 'div' });
+        return;
+      }
+      ctx.setProperty(node, 'data', {
+        hName: TABS_TAG,
+        hProperties: { group: node.attributes?.group || 'platform' },
+      });
+    },
+  };
+}
+
+// A pane marker: a paragraph that is nothing but one bold run.
+function markerLabel(node, ctx) {
+  if (node.type !== 'element' || node.tagName !== 'p') return null;
+  const children = node.children ?? [];
+  if (children.length !== 1) return null;
+  const [only] = children;
+  if (only.type !== 'element' || only.tagName !== 'strong') return null;
+  return ctx.textContent(only).trim() || null;
+}
+
+const isBlank = (node) => node.type === 'text' && !node.value.trim();
+
+export function tabGroups() {
+  let count = 0;
+  return {
+    name: 'tab-groups',
+    before() {
+      count = 0;
+    },
+    element: {
+      filter: [TABS_TAG],
+      visit(node, ctx) {
+        const group =
+          typeof node.properties?.group === 'string' ? node.properties.group : 'platform';
+        const panes = [];
+        let stray = false;
+        for (const child of node.children ?? []) {
+          const label = markerLabel(child, ctx);
+          if (label) {
+            panes.push({ label, key: tabKey(label), children: [] });
+          } else if (panes.length === 0) {
+            if (!isBlank(child)) stray = true;
+          } else {
+            panes[panes.length - 1].children.push(child);
+          }
+        }
+        if (stray) {
+          ctx.report({
+            message: ':::tabs has content before its first **label** marker.',
+            node,
+            severity: 'error',
+          });
+        }
+        if (panes.length < 2) {
+          ctx.report({
+            message: ':::tabs needs at least two **label** markers.',
+            node,
+            severity: 'error',
+          });
+          // Unwrap rather than render a one-tab control: the content survives.
+          return { type: 'element', tagName: 'div', properties: {}, children: node.children ?? [] };
+        }
+        for (const pane of panes) {
+          if (!TAB_KEYS.includes(pane.key)) {
+            ctx.report({
+              message: `Tab "${pane.label}" has no rule pair in prose.css. Add one for "${pane.key}" or use one of: ${TAB_KEYS.join(', ')}.`,
+              node,
+              severity: 'error',
+            });
+          }
+        }
+
+        const index = ++count;
+        // One radio group per dimension for the whole document, so every tab
+        // group on the page moves together: the reader picks a platform once.
+        const name = `lwf-tab-${group}`;
+        const bar = {
+          type: 'element',
+          tagName: 'div',
+          properties: { class: 'tabs-bar', role: 'group', 'aria-label': 'Platform' },
+          children: panes.flatMap((pane, i) => {
+            const id = `tab-${index}-${pane.key}`;
+            const input = {
+              type: 'element',
+              tagName: 'input',
+              properties: {
+                type: 'radio',
+                class: 'tabs-radio',
+                name,
+                id,
+                value: pane.key,
+                // Every group marks its first tab checked. They share a name,
+                // so the browser keeps the last one — still the first tab, so
+                // the page opens on it whichever group wins.
+                ...(i === 0 ? { checked: true } : {}),
+                // Radios normally share one tab stop. Here the group spans the
+                // whole document, so without this only one bar on the page
+                // would be reachable by keyboard.
+                tabindex: '0',
+              },
+              children: [],
+            };
+            const label = {
+              type: 'element',
+              tagName: 'label',
+              properties: { class: 'tabs-tab', for: id, 'data-tab': pane.key },
+              children: [{ type: 'text', value: pane.label }],
+            };
+            return [input, label];
+          }),
+        };
+        const sections = panes.map((pane) => ({
+          type: 'element',
+          tagName: 'section',
+          properties: { class: 'tabs-pane', 'data-tab': pane.key },
+          children: [
+            // Named again inside the pane, hidden by CSS. If the stylesheet
+            // never arrives every pane is visible, and this is what tells them
+            // apart.
+            {
+              type: 'element',
+              tagName: 'p',
+              properties: { class: 'tabs-pane-name' },
+              children: [{ type: 'text', value: pane.label }],
+            },
+            ...pane.children,
+          ],
+        }));
+        return {
+          type: 'element',
+          tagName: 'div',
+          properties: { class: 'tabs' },
+          children: [bar, ...sections],
+        };
+      },
+    },
+  };
+}
