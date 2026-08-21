@@ -1,0 +1,26 @@
+---
+import { getCollection, render } from 'astro:content';
+import { downloadUrl, latestTag } from '../../lib/release';
+
+export async function getStaticPaths() {
+  const mods = await getCollection('mods');
+  return mods.map((mod) => ({ params: { slug: mod.id }, props: { mod } }));
+}
+
+const { mod } = Astro.props;
+const { Content } = await render(mod);
+const tag = await latestTag(mod.data.repo, mod.data.version);
+---
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8" /><title>{mod.data.title}</title></head>
+  <body>
+    <h1>{mod.data.title}</h1>
+    <p>{mod.data.summary}</p>
+    <a href={downloadUrl(mod.data.repo, mod.data.dll)} download>
+      Download{tag ? ` ${tag}` : ''}
+    </a>
+    <a href={`https://github.com/${mod.data.repo}`}>Source</a>
+    <Content />
+  </body>
+</html>

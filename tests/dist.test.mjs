@@ -97,3 +97,13 @@ test('headings carry ids and anchor affordances', () => {
   assert.match(reference.html, /<h2 id="[^"]+"/, 'headings have no ids');
   assert.match(reference.html, /class="anchor"/, 'headings have no anchor affordance');
 });
+
+test('each mod page offers the permanent-redirect download', () => {
+  const mod = docs.find((d) => d.path === 'mods/custom-difficulty/index.html');
+  assert.ok(mod, 'mods/custom-difficulty/index.html was not built');
+  assert.match(
+    mod.html,
+    /https:\/\/github\.com\/meowous3\/lwf-custom-difficulty\/releases\/latest\/download\/LwfCustomDifficulty\.dll/,
+    'the download link is not the permanent redirect',
+  );
+});

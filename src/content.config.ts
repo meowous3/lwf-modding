@@ -10,4 +10,16 @@ const guides = defineCollection({
   }),
 });
 
-export const collections = { guides };
+const mods = defineCollection({
+  loader: glob({ pattern: '*.md', base: './mods' }),
+  schema: z.object({
+    title: z.string(),
+    repo: z.string(),
+    dll: z.string(),
+    summary: z.string(),
+    gameVersion: z.string(),
+    version: z.string().optional(),
+  }),
+});
+
+export const collections = { guides, mods };
