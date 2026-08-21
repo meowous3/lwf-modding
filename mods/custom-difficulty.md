@@ -12,8 +12,7 @@ screenshotAlt: The difficulty screen with the Custom options panel beside the Cu
 Adds a **Custom** difficulty, the leftmost card in the carousel. Set its time limit, repayment
 count, growth curve and taxes from the difficulty screen.
 
-Custom runs pay `x0.00` and record nothing — no unlocks, no clears, no run history. You can set
-them to be trivially winnable, so they never touch your save.
+Custom runs pay `x0.00` and don't touch your save — no unlocks, no clears, no run history.
 
 ## Options
 
