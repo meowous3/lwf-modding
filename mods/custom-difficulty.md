@@ -7,13 +7,11 @@ gameVersion: "0.21.0"
 version: v0.2.0
 ---
 
-Adds a **Custom** difficulty whose time limit, repayment count, repayment curve and taxes are
-set from the difficulty selection screen. It is the leftmost card in the difficulty carousel.
+Adds a **Custom** difficulty, the leftmost card in the carousel. Set its time limit, repayment
+count, growth curve and taxes from the difficulty screen.
 
-Custom runs pay `x0.00` and write nothing to your save. Nothing done in one is earned — the
-run's own settings decide what winning takes, and one repayment of one coin is a legal
-configuration — so no progress of any kind is recorded: no cleared difficulty, no unlock
-notice, no patron clears, no biome, no adventure progress, and no entry in run history.
+Custom runs pay `x0.00` and record nothing — no unlocks, no clears, no run history. You can set
+them to be trivially winnable, so they never touch your save.
 
 ## Options
 
@@ -43,6 +41,6 @@ Exponential     target += FirstRepayment × GrowthAmount^n
 
 then `+= Surcharge` whenever `n` divides evenly by **Surcharge Every**.
 
-In Exponential, Growth Amount is the acceleration: every step is the one before it times that
+In Exponential, Growth Amount is the acceleration — each step is the one before it times that
 number. A multiplier below `1` holds the curve flat rather than reducing it. Targets cap at
 `536870911`.
