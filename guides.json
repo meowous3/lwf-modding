@@ -1,11 +1,18 @@
 {
   "guides": [
     {
-      "slug": "modding",
-      "title": "Modding guide",
-      "audience": "For people",
+      "slug": "getting-started",
+      "title": "Your first mod",
+      "audience": "Start here",
+      "file": "guides/GETTING-STARTED.md",
+      "blurb": "From nothing to a plugin you can see working: install BepInEx, build a project, patch a method, check the log at every step."
+    },
+    {
+      "slug": "notes",
+      "title": "Notes on the game",
+      "audience": "Reference",
       "file": "guides/MODDING.md",
-      "blurb": "How the game is put together, what can be changed, and the traps that cost the most time."
+      "blurb": "What the game is made of and where it gives way — architecture, the seams worth patching, and the traps found the hard way."
     },
     {
       "slug": "agents",

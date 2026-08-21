@@ -2,7 +2,8 @@
 
 Notes from modding **Lazy Witch's Factory** with BepInEx 5. Unity 6000.0.80f1, Mono, x64.
 
-- [`guides/MODDING.md`](guides/MODDING.md) — how the game is put together and where it can be changed.
+- [`guides/GETTING-STARTED.md`](guides/GETTING-STARTED.md) — start here. Nothing to a working plugin, step by step.
+- [`guides/MODDING.md`](guides/MODDING.md) — notes on how the game is put together and where it gives way.
 - [`guides/AGENTS.md`](guides/AGENTS.md) — the same ground as protocol, for coding agents.
 
 Rendered, with the mods: **https://meowous3.github.io/lwf-modding/**

@@ -1,4 +1,7 @@
-# Modding Lazy Witch's Factory
+# Notes on the game
+
+What the game is made of and where it gives way. Assumes a plugin that already loads — if you
+do not have one yet, start with [Your first mod](GETTING-STARTED.md).
 
 Unity 6000.0.80f1, Mono, x64. Steam app `3971650` (demo: `4638750`).
 
