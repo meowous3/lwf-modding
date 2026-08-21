@@ -2,7 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Ornament from '../../components/Ornament.astro';
-import { downloadUrl } from '../../lib/release';
+import { dateAttr, downloadUrl, formatDate, releaseDates } from '../../lib/release';
 import { href } from '../../lib/url';
 
 export async function getStaticPaths() {
@@ -12,51 +12,155 @@ export async function getStaticPaths() {
 
 const { mod } = Astro.props;
 const { Content } = await render(mod);
+
+// Build-time only, memoised per repo, and null whenever GitHub cannot be reached. Null means
+// the two date rows are not rendered at all — never a blank cell, a dash or "unknown".
+const dates = await releaseDates(mod.data.repo);
 ---
 
-<Base title={`${mod.data.title} — Lazy Witch's Factory modding`} description={mod.data.summary}>
+<Base
+  title={`${mod.data.title} — Lazy Witch's Factory modding`}
+  description={mod.data.summary}
+  wide
+>
   <Ornament text={mod.data.title} lead={mod.data.summary} />
 
-  <div class="bar">
-    <a class="btn" href={downloadUrl(mod.data.repo, mod.data.dll)} download>
-      Download
-    </a>
-    <a class="btn ghost" href={href('install')}>How to install</a>
-    <a class="btn ghost" href={`https://github.com/${mod.data.repo}`}>Source</a>
-    <span class="built">Built against {mod.data.gameVersion}</span>
+  <div class="mod">
+    <aside class="side">
+      <div class="panel get">
+        <a class="btn grab" href={downloadUrl(mod.data.repo, mod.data.dll)} download>Download</a>
+        <a class="how" href={href('install')}>How to install</a>
+
+        <dl class="meta">
+          {
+            dates && (
+              <>
+                <dt>Released</dt>
+                <dd>
+                  <time datetime={dateAttr(dates.released)}>{formatDate(dates.released)}</time>
+                </dd>
+                <dt>Updated</dt>
+                <dd>
+                  <time datetime={dateAttr(dates.updated)}>{formatDate(dates.updated)}</time>
+                </dd>
+              </>
+            )
+          }
+          <dt>Game version</dt>
+          <dd>{mod.data.gameVersion}</dd>
+          <dt>Source</dt>
+          <dd><a href={`https://github.com/${mod.data.repo}`}>GitHub</a></dd>
+        </dl>
+      </div>
+    </aside>
+
+    <div class="body">
+      {
+        mod.data.screenshot && (
+          <img
+            class="shot"
+            src={href(mod.data.screenshot)}
+            alt={mod.data.screenshotAlt ?? `${mod.data.title} in game`}
+            loading="lazy"
+          />
+        )
+      }
+      <article class="prose"><Content /></article>
+    </div>
   </div>
-
-  {mod.data.screenshot && (
-    <img
-      class="shot"
-      src={href(mod.data.screenshot)}
-      alt={mod.data.screenshotAlt ?? `${mod.data.title} in game`}
-      loading="lazy"
-    />
-  )}
-
-  <article class="prose"><Content /></article>
 </Base>
 
 <style>
-  .bar {
-    display: flex;
-    gap: 0.6rem;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 2.5rem;
+  /* Content left, the download plaque sticky on the right — the shape a mod host has.
+     The aside comes first in the markup so that below the breakpoint, where the grid
+     collapses to one column, the button lands above the article instead of a screen
+     and a half below it. */
+  .mod {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 17rem;
+    gap: 3rem;
+    align-items: start;
   }
-  .built {
-    color: var(--muted-text);
-    font-size: 0.85rem;
+  .side {
+    grid-column: 2;
+    grid-row: 1;
+    position: sticky;
+    top: 1.5rem;
   }
+  .body {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .grab {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    text-align: center;
+    font-size: 1rem;
+  }
+
+  .how {
+    display: block;
+    margin-top: 0.75rem;
+    text-align: center;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .how:hover {
+    text-decoration: underline;
+  }
+
+  /* Label left, value right, a quiet engraved rule above each row — the game's own
+     panels, not a bordered HTML table. */
+  .meta {
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: baseline;
+    column-gap: 0.75rem;
+    margin: 1.15rem 0 0;
+    font-size: 0.86rem;
+  }
+  .meta dt,
+  .meta dd {
+    margin: 0;
+    padding: 0.42rem 0;
+    border-top: 1px solid var(--surface-lip);
+  }
+  .meta dt {
+    color: var(--ink-on-surface-muted);
+  }
+  .meta dd {
+    text-align: right;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+
   .shot {
     display: block;
     width: 100%;
+    max-width: var(--measure);
     height: auto;
-    margin: 0 0 2.5rem;
+    margin: 0 auto 2rem;
     border: 1px solid var(--rule);
-    border-radius: 6px;
+    border-radius: var(--radius);
+  }
+
+  /* The same breakpoint the guide layout drops its sidebar at. */
+  @media (max-width: 900px) {
+    .mod {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 2rem;
+    }
+    .side,
+    .body {
+      grid-column: 1;
+      grid-row: auto;
+    }
+    .side {
+      position: static;
+    }
   }
 </style>
