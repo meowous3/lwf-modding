@@ -2,7 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Ornament from '../../components/Ornament.astro';
-import { downloadUrl, latestTag } from '../../lib/release';
+import { downloadUrl } from '../../lib/release';
 import { href } from '../../lib/url';
 
 export async function getStaticPaths() {
@@ -12,7 +12,6 @@ export async function getStaticPaths() {
 
 const { mod } = Astro.props;
 const { Content } = await render(mod);
-const tag = await latestTag(mod.data.repo, mod.data.version);
 ---
 
 <Base title={`${mod.data.title} — Lazy Witch's Factory modding`} description={mod.data.summary}>
@@ -20,7 +19,7 @@ const tag = await latestTag(mod.data.repo, mod.data.version);
 
   <div class="bar">
     <a class="btn" href={downloadUrl(mod.data.repo, mod.data.dll)} download>
-      Download{tag ? ` ${tag}` : ''}
+      Download
     </a>
     <a class="btn ghost" href={href('install')}>How to install</a>
     <a class="btn ghost" href={`https://github.com/${mod.data.repo}`}>Source</a>

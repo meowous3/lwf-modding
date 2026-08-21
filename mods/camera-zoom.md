@@ -4,7 +4,6 @@ repo: meowous3/lwf-camera-zoom
 dll: LwfCameraZoom.dll
 summary: Ctrl and the scroll wheel move the camera closer to the factory or further back.
 gameVersion: "0.21.0"
-version: v0.1.0
 ---
 
 Hold **Ctrl** and scroll to move the camera in or out. **Ctrl+0** puts it back.

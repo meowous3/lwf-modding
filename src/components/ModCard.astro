@@ -1,19 +1,17 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import { href } from '../lib/url';
-import { downloadUrl, latestTag } from '../lib/release';
+import { downloadUrl } from '../lib/release';
 
 interface Props {
   mod: CollectionEntry<'mods'>;
 }
 const { mod } = Astro.props;
-const tag = await latestTag(mod.data.repo, mod.data.version);
 ---
 
 <article class="panel card">
   <div class="head">
     <h2><a href={href(`mods/${mod.id}`)}>{mod.data.title}</a></h2>
-    {tag && <span class="tag">{tag}</span>}
   </div>
   <p class="summary">{mod.data.summary}</p>
   <div class="actions">
@@ -44,12 +42,6 @@ const tag = await latestTag(mod.data.repo, mod.data.version);
   }
   h2 a:hover {
     color: #fff;
-  }
-  .tag {
-    flex-shrink: 0;
-    font-size: 0.8rem;
-    color: var(--muted);
-    font-variant-numeric: tabular-nums;
   }
   .summary {
     margin: 0;
