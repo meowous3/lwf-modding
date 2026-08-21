@@ -1,40 +1,39 @@
 ---
 title: Installing mods
-summary: BepInEx, the launch option, and where the .dll goes.
+summary: Install BepInEx, then copy each mod's .dll into BepInEx/plugins.
 ---
-
-Every mod here is a BepInEx 5 plugin, so BepInEx has to be installed first. After that,
-installing a mod means copying one file.
 
 ## Requirements
 
-[BepInEx 5.4.23.5 `win_x64`](https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip). Use the
-Windows build on Linux too — the game runs through Proton. BepInEx 6 targets IL2CPP games and
-can't load BepInEx 5 plugins, so nothing here will run on it.
+- Lazy Witch's Factory, installed through Steam.
+- [BepInEx 5.4.23.5 `win_x64`](https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip). Use this build on Linux too. The game runs through Proton.
+- BepInEx 6 will not work. It targets IL2CPP games. Lazy Witch's Factory is Mono, and BepInEx 6 cannot load BepInEx 5 plugins.
 
-## 1. Install BepInEx
+## Install BepInEx
 
-Extract the archive into the game folder — the one containing `LazyWitchsFactory.exe`, not a
-subfolder. You should end up with `winhttp.dll`, `doorstop_config.ini` and a `BepInEx` folder
-beside the executable.
+1. In Steam, right-click **Lazy Witch's Factory** and choose **Properties → Installed Files →
+   Browse** to open the game folder.
 
-To find that folder, right-click the game in Steam and pick **Properties → Installed Files →
-Browse**.
+   ![Steam's game Properties window, with Installed Files selected and the Browse button in the top right](/media/steam-browse.png)
 
-![Steam's game Properties window, with Installed Files selected and the Browse button in the top right](/media/steam-browse.png)
+2. Extract the zip into the game folder, not into a subfolder of it.
 
-On Linux, add this to the game's Steam launch options:
+3. Check that `winhttp.dll`, `doorstop_config.ini` and a `BepInEx` folder are now next to
+   `LazyWitchsFactory.exe`.
 
-```
-WINEDLLOVERRIDES="winhttp=n,b" %command%
-```
+4. **Linux only.** In Steam, right-click the game and choose **Properties → General → Launch
+   Options**, then paste in:
 
-Without it BepInEx never loads, and nothing reports an error — the game just runs unmodded.
+   ```
+   WINEDLLOVERRIDES="winhttp=n,b" %command%
+   ```
 
-## 2. Run the game once
+5. Start the game, then quit.
 
-Launch it, reach the title screen, quit. This creates `BepInEx/plugins`, which has to exist
-before you can install anything. To confirm BepInEx loaded:
+## Check it worked
+
+Search `BepInEx/LogOutput.log` for the startup line. Replace `<game>` with the path to the game
+folder.
 
 :::tabs
 
@@ -52,22 +51,36 @@ grep "Chainloader started" "<game>/BepInEx/LogOutput.log"
 
 :::
 
-## 3. Install the mod
+## Install a mod
 
-Put its `.dll` in `BepInEx/plugins/` and start the game.
+1. Download the mod's `.dll` from its page on this site.
 
-## Nothing happened
+2. Copy the `.dll` into `BepInEx/plugins` in the game folder. Do not put it in a subfolder, and
+   do not rename it.
 
-In order of likelihood:
+3. Start the game.
 
-1. **On Linux, the launch option is missing.** No `LogOutput.log` at all is the tell.
-2. **BepInEx went into a subfolder.** `winhttp.dll` has to sit beside `LazyWitchsFactory.exe`.
-3. **BepInEx 6 instead of 5.** The plugin won't load against a different API.
-4. **The `.dll` isn't in `BepInEx/plugins/`.**
+To install another mod, copy its `.dll` into the same `BepInEx/plugins` folder.
 
-If `LogOutput.log` exists, open it — a plugin that failed to load says so by name.
+## Troubleshooting
+
+If the game runs but a mod does nothing, check these in order.
+
+1. **On Linux, the launch option is missing.** Without it BepInEx never loads, the game starts
+   normally, and no error appears. `BepInEx/LogOutput.log` is never created.
+2. **BepInEx went into a subfolder.** `winhttp.dll` has to sit beside `LazyWitchsFactory.exe`,
+   not one folder deeper.
+3. **BepInEx 6 is installed instead of BepInEx 5.** Plugins built for BepInEx 5 do not load on
+   BepInEx 6. Install 5.4.23.5.
+4. **The `.dll` is not in `BepInEx/plugins`.** It does not load from `BepInEx` itself, or from a
+   subfolder of `plugins`.
+
+Open `BepInEx/LogOutput.log` if it exists. A plugin that failed to load is named there, with
+the error that stopped it.
 
 ## Uninstalling
 
-Delete the mod's `.dll` from `BepInEx/plugins/`. To remove BepInEx entirely, delete
-`winhttp.dll`, `doorstop_config.ini` and the `BepInEx/` folder, and clear the launch option.
+To remove one mod, delete its `.dll` from `BepInEx/plugins`.
+
+To remove BepInEx, delete `winhttp.dll`, `doorstop_config.ini` and the `BepInEx` folder from the
+game folder. On Linux, clear the launch option in Steam as well.

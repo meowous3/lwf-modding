@@ -137,6 +137,21 @@ test('the Proton launch option is on the install page', () => {
   assert.match(install.html, /WINEDLLOVERRIDES/, 'the launch option is missing from /install/');
 });
 
+// The page has been trimmed before, and the two paths a reader has to type by
+// hand are the first things a trim reaches for. Neither is derivable from the
+// other prose, so both are pinned here.
+test('the install page still names the game folder and the plugins folder', () => {
+  const install = docs.find((d) => d.path === 'install/index.html');
+  assert.ok(install, 'install/index.html was not built');
+  const text = install.html.replace(/<[^>]+>/g, '');
+  assert.match(
+    text,
+    /LazyWitchsFactory\.exe/,
+    'the install page no longer identifies the game folder by its executable',
+  );
+  assert.match(text, /BepInEx\/plugins/, 'the install page no longer names the plugins folder');
+});
+
 test('the install steps are not duplicated in the developer guide', () => {
   const firstMod = docs.find((d) => d.path === 'guides/first-mod/index.html');
   assert.ok(
