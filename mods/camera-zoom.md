@@ -12,12 +12,8 @@ Plain scroll still cycles the hotbar.
 
 ## Rebinding
 
-The modifier has a row in the game's own **Key Config** screen, listed as *Camera Zoom
-Modifier*. Rebinding it there changes both the zoom and the reset, so setting it to Alt gives
-you Alt+scroll and Alt+0.
-
-The binding is kept in the plugin's config rather than the game's key config save, so removing
-the mod leaves nothing behind.
+The modifier has a row in the game's **Key Config** screen, listed as *Camera Zoom Modifier*.
+Rebinding it changes the reset too — set it to Alt and you get Alt+scroll and Alt+0.
 
 ## Config
 
@@ -29,6 +25,3 @@ the mod leaves nothing behind.
 | `MinOffset` | `-55` | Furthest back |
 | `MaxOffset` | `16` | Closest in |
 | `Smooth` | `true` | Ease instead of snap |
-
-The range is deliberately lopsided. The camera is tilted, so zooming in drops it toward the
-ground and stops being useful quickly, while pulling back just widens the view.
