@@ -4,6 +4,8 @@ repo: meowous3/lwf-camera-zoom
 dll: LwfCameraZoom.dll
 summary: Ctrl and the scroll wheel move the camera closer to the factory or further back.
 gameVersion: "0.21.0"
+screenshot: mods/camera-zoom.png
+screenshotAlt: A factory seen zoomed out, with the whole plot visible
 ---
 
 Hold **Ctrl** and scroll to move the camera in or out. **Ctrl+0** puts it back.
