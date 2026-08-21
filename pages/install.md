@@ -31,9 +31,8 @@ BepInEx/
 WINEDLLOVERRIDES="winhttp=n,b" %command%
 ```
 
-Without it Proton ignores `winhttp.dll`, so BepInEx never loads and you get no error at all —
-the game just runs unmodded. If a mod seems to do nothing later, come back and check this
-first.
+Without it Proton ignores `winhttp.dll`, so BepInEx never loads — and it fails silently, with
+no error anywhere. The game just runs unmodded.
 
 **Stick with BepInEx 5.** You might see BepInEx 6 around — that's for IL2CPP games, and this one
 is Mono, so 5 is what you want on Windows and Linux alike. 6 is also still a pre-release and
@@ -45,13 +44,20 @@ isn't going anywhere.
 Launch the game, get to the title screen, then quit. BepInEx creates its folders the first time
 it runs, and you need `BepInEx/plugins` to exist before you can install anything.
 
-Check that it actually loaded:
+Check that it actually loaded. Open `BepInEx/LogOutput.log` and look for a line reading
+`Chainloader started`. From a terminal, on Windows:
+
+```powershell
+Select-String "Chainloader started" "<game>\BepInEx\LogOutput.log"
+```
+
+On Linux or macOS:
 
 ```bash
 grep "Chainloader started" "<game>/BepInEx/LogOutput.log"
 ```
 
-If you get a match, you're good. If there's no `LogOutput.log` at all and you're on Linux, you
+A match means BepInEx is running. If there's no `LogOutput.log` at all and you're on Linux, you
 missed the launch option in step 1.
 
 ## 3. Install the mod
