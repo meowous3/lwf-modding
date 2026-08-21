@@ -5,14 +5,14 @@
       "title": "Your first mod",
       "audience": "Start here",
       "file": "guides/GETTING-STARTED.md",
-      "blurb": "From nothing to a plugin you can see working: install BepInEx, build a project, patch a method, check the log at every step."
+      "blurb": "Build a working mod from an empty folder, step by step: install BepInEx, set up a project, patch a method, and see the change in game."
     },
     {
       "slug": "notes",
       "title": "Notes on the game",
       "audience": "Reference",
       "file": "guides/MODDING.md",
-      "blurb": "What the game is made of and where it gives way — architecture, the seams worth patching, and the traps found the hard way."
+      "blurb": "How the game is put together and where it can be changed \u2014 the architecture, the methods worth patching, and the traps that took longest to find."
     },
     {
       "slug": "agents",
