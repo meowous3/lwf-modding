@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readdir, readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 const DIST = new URL('../dist/', import.meta.url).pathname;
@@ -90,6 +91,28 @@ test('guide bodies are in the HTML, not fetched', () => {
 test('cross-guide markdown links are rewritten to routes', () => {
   const firstMod = docs.find((d) => d.path === 'guides/first-mod/index.html');
   assert.ok(!/href="[^"]*\.md"/.test(firstMod.html), 'a raw .md href survived into the built page');
+});
+
+test('a mod screenshot is emitted and its src carries the base', () => {
+  const mod = docs.find((d) => d.path === 'mods/custom-difficulty/index.html');
+  const src = /<img[^>]*class="shot"[^>]*src="([^"]+)"/.exec(mod.html)?.[1];
+  assert.ok(src, 'the screenshot did not render');
+  assert.ok(src.startsWith(`${BASE}/`), `screenshot src skips the base: ${src}`);
+  assert.ok(
+    existsSync(join(DIST, src.slice(BASE.length + 1))),
+    `screenshot src points at a file that was not built: ${src}`,
+  );
+});
+
+test('markdown images carry the base and were built', () => {
+  const install = docs.find((d) => d.path === 'install/index.html');
+  const src = /<img[^>]*src="([^"]+)"/.exec(install.html)?.[1];
+  assert.ok(src, 'the install page has no image');
+  assert.ok(src.startsWith(`${BASE}/`), `image src skips the base: ${src}`);
+  assert.ok(
+    existsSync(join(DIST, src.slice(BASE.length + 1))),
+    `image src points at a file that was not built: ${src}`,
+  );
 });
 
 test('headings carry ids and anchor affordances', () => {

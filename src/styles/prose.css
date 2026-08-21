@@ -154,8 +154,10 @@
 }
 
 .prose img {
+  display: block;
   max-width: 100%;
   height: auto;
+  border: 1px solid var(--rule);
   border-radius: var(--radius);
 }
 
