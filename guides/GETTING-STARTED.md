@@ -41,8 +41,10 @@ Without it Proton ignores `winhttp.dll`, so BepInEx never loads and you get no e
 the game just runs unmodded. If your mod seems to do nothing later, come back and check this
 first.
 
-**Don't use BepInEx 6.** It's a different loader with a different API, and none of the code here
-will work on it.
+**Stick with BepInEx 5.** You might see BepInEx 6 around — that's for IL2CPP games, and this one
+is Mono, so 5 is what you want on Windows and Linux alike. 6 is also still a pre-release and
+can't load BepInEx 5 plugins, so a DLL you build following this guide won't run on it. 5 is in
+long-term support and isn't going anywhere.
 
 ## 2. Run the game once
 
