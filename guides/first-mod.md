@@ -213,5 +213,5 @@ Three things cost more time than everything else combined:
 - **A save you cannot undo.** Anything writing progression deserves checking before you run it
   on a save you care about. Back up `SaveData/` first.
 
-Then read the [notes](MODDING.md) — the architecture, the seams worth patching, and the traps
+Then read the [notes](reference.md) — the architecture, the seams worth patching, and the traps
 found the hard way.

@@ -25,6 +25,7 @@
   "type": "module",
   "private": true,
   "dependencies": {
+    "@astrojs/markdown-satteri": "^0.3.7",
     "astro": "7.2.4"
   }
 }

@@ -86,3 +86,14 @@ test('guide bodies are in the HTML, not fetched', () => {
   const text = firstMod.html.replace(/<[^>]+>/g, '');
   assert.ok(text.includes('dotnet new classlib'), 'guide body is missing from the built page');
 });
+
+test('cross-guide markdown links are rewritten to routes', () => {
+  const firstMod = docs.find((d) => d.path === 'guides/first-mod/index.html');
+  assert.ok(!/href="[^"]*\.md"/.test(firstMod.html), 'a raw .md href survived into the built page');
+});
+
+test('headings carry ids and anchor affordances', () => {
+  const reference = docs.find((d) => d.path === 'guides/reference/index.html');
+  assert.match(reference.html, /<h2 id="[^"]+"/, 'headings have no ids');
+  assert.match(reference.html, /class="anchor"/, 'headings have no anchor affordance');
+});
