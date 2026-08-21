@@ -1,4 +1,8 @@
-# Your first mod
+---
+title: Your first mod
+blurb: From nothing to a plugin you can see working — project, patch, log, iterate.
+order: 1
+---
 
 From nothing to a plugin you can see working, in about fifteen minutes. Every step ends with
 something you can check, so a mistake shows up where it happened rather than three steps later.

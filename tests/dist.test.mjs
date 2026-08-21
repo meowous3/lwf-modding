@@ -68,3 +68,21 @@ test('every internal link resolves to a built file', () => {
   }
   assert.deepEqual(broken, [], 'internal links pointing at files that were not built');
 });
+
+test('every guide is built as its own route', () => {
+  for (const slug of ['first-mod', 'reference', 'agents']) {
+    assert.ok(
+      docs.some((d) => d.path === `guides/${slug}/index.html`),
+      `guides/${slug}/index.html was not built`,
+    );
+  }
+});
+
+test('guide bodies are in the HTML, not fetched', () => {
+  const firstMod = docs.find((d) => d.path === 'guides/first-mod/index.html');
+  // Shiki splits highlighted code into a <span> per token, so the phrase itself
+  // is never contiguous in the markup even though every token is present —
+  // strip tags before matching so this checks the rendered text, not the markup.
+  const text = firstMod.html.replace(/<[^>]+>/g, '');
+  assert.ok(text.includes('dotnet new classlib'), 'guide body is missing from the built page');
+});

@@ -1,4 +1,8 @@
-# Notes on the game
+---
+title: Modding reference
+blurb: What the game is made of and where it gives way — architecture, the seams worth patching, and the traps found the hard way.
+order: 2
+---
 
 What the game is made of and where it gives way. Assumes a plugin that already loads — if you
 do not have one yet, start with [Your first mod](GETTING-STARTED.md).

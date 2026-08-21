@@ -1,0 +1,21 @@
+---
+import { getCollection } from 'astro:content';
+import { href } from '../../lib/url';
+
+const guides = (await getCollection('guides')).sort((a, b) => a.data.order - b.data.order);
+---
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8" /><title>Guides — Lazy Witch's Factory modding</title></head>
+  <body>
+    <h1>Guides</h1>
+    <ul>
+      {guides.map((g) => (
+        <li>
+          <a href={href(`guides/${g.id}`)}>{g.data.title}</a>
+          <p>{g.data.blurb}</p>
+        </li>
+      ))}
+    </ul>
+  </body>
+</html>
