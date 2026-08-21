@@ -1,6 +1,10 @@
-# Agent guide: modding Lazy Witch's Factory
+---
+title: Agent protocol
+blurb: The same ground as a working protocol — verify targets by reflection, measure before patching, log applied values.
+order: 3
+---
 
-Protocol and facts. Human version: `MODDING.md`.
+Protocol and facts. Human version: `reference.md`.
 
 ## Target
 

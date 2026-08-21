@@ -1,57 +1,16 @@
-# Your first mod
+---
+title: Your first mod
+blurb: From nothing to a plugin you can see working — project, patch, log, iterate.
+order: 1
+---
 
 From nothing to a plugin you can see working, in about fifteen minutes. Every step ends with
 something you can check, so a mistake shows up where it happened rather than three steps later.
 
-You need the [.NET SDK](https://dotnet.microsoft.com/download) (8 or newer) and the game.
+You need the [.NET SDK](https://dotnet.microsoft.com/download) (8 or newer), the game, and
+BepInEx already working — see [Installing mods](/lwf-modding/install/) if it is not.
 
-## 1. Install BepInEx
-
-Download **[BepInEx 5.4.23.5, `win_x64`](https://github.com/BepInEx/BepInEx/releases/tag/v5.4.23.5)**
-and extract it into the game folder — the one with the `.exe` in it, not a subfolder.
-
-Take the Windows build even on Linux. The game runs under Proton, so it is a Windows process.
-
-Right afterwards the folder contains:
-
-```
-LazyWitchsFactory.exe
-winhttp.dll
-doorstop_config.ini
-BepInEx/
-```
-
-**Version matters.** BepInEx 6 is a different loader with a different API; this guide and
-everything in the notes assumes 5.
-
-## 2. Linux only: the launch option
-
-Right-click the game in Steam → Properties → Launch Options:
-
-```
-WINEDLLOVERRIDES="winhttp=n,b" %command%
-```
-
-Without it Proton ignores `winhttp.dll` and **nothing loads, with no error** — the game just
-runs unmodded. This is the single most common reason a first plugin appears to do nothing.
-
-## 3. Run the game once
-
-Start it, reach the title screen, quit. BepInEx generates its folders on first run:
-
-```
-BepInEx/config/     BepInEx/core/     BepInEx/plugins/     BepInEx/LogOutput.log
-```
-
-Check it loaded:
-
-```bash
-grep "Chainloader started" "<game>/BepInEx/LogOutput.log"
-```
-
-A hit means BepInEx is running. No `LogOutput.log` at all on Linux means step 2 was missed.
-
-While you are here, open `BepInEx/config/BepInEx.cfg` and set:
+Before you start, open `BepInEx/config/BepInEx.cfg` and set:
 
 ```ini
 [Logging.Disk]
@@ -62,7 +21,7 @@ AppendLog = true
 The first sends the game's own exceptions to your log, which you will want the first time
 something throws. The second stops each launch from overwriting the last one's evidence.
 
-## 4. Make a project
+## 1. Make a project
 
 ```bash
 mkdir -p mymod/src/MyMod && cd mymod
@@ -112,7 +71,7 @@ Replace `src/MyMod/MyMod.csproj` with:
 `Private=false` on every game reference. Without it the build copies the game's assemblies
 next to your DLL, and BepInEx loads those copies instead of the real ones.
 
-## 5. Write the plugin
+## 2. Write the plugin
 
 `src/MyMod/Plugin.cs`:
 
@@ -136,14 +95,14 @@ namespace MyMod
 
 The GUID must be unique across every plugin installed, so use a domain-ish prefix.
 
-## 6. Build and install
+## 3. Build and install
 
 ```bash
 dotnet build -c Release src/MyMod/MyMod.csproj
 cp src/MyMod/bin/Release/netstandard2.1/MyMod.dll "<game>/BepInEx/plugins/"
 ```
 
-## 7. Check it loaded
+## 4. Check it loaded
 
 Run the game to the title screen, quit, then:
 
@@ -161,7 +120,7 @@ Expected:
 Only the first line means `Awake` threw — the exception is in the log just after it. Neither
 line means the DLL is not in `plugins/`, or it targets the wrong framework.
 
-## 8. Change something
+## 5. Change something
 
 Add `src/MyMod/DoubleRewards.cs`:
 
@@ -185,7 +144,7 @@ read `x1.00`. The results screen pays it too — both go through this one method
 A `Postfix` runs after the original and can edit `__result`. A `Prefix` runs before and can skip
 the original by returning `false`.
 
-## 9. Find your own targets
+## 6. Find your own targets
 
 Decompile the game and read it. It is not obfuscated, so the class and method names are real.
 
@@ -198,16 +157,17 @@ grep -rn "GetDifficultyMultiplier" ./decomp
 Read the method before patching it. Do not guess a signature — `[HarmonyPatch]` arguments are
 not checked by the compiler, so a wrong one builds cleanly and then binds nothing.
 
-## 10. Before you trust it
+## 7. Before you trust it
 
 Three things cost more time than everything else combined:
 
 - **A patch that never runs.** Mono inlines small methods, and a patch on an inlined method
   reports as applied and never fires. Log a value you read back from the object, not the value
   you meant to write, so the log distinguishes "it worked" from "it was ignored".
-- **A silent Linux install.** No log at all is step 2, every time.
+- **A silent Linux install.** No log at all means the launch option in
+  [Installing mods](/lwf-modding/install/) was missed, every time.
 - **A save you cannot undo.** Anything writing progression deserves checking before you run it
   on a save you care about. Back up `SaveData/` first.
 
-Then read the [notes](MODDING.md) — the architecture, the seams worth patching, and the traps
+Then read the [notes](reference.md) — the architecture, the seams worth patching, and the traps
 found the hard way.

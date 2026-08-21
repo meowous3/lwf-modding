@@ -1,0 +1,88 @@
+---
+/**
+ * The page title, in the game's own form: a heavy serif flanked by diamonds
+ * over a double rule. This renders the page's only <h1>; no page adds another.
+ */
+interface Props {
+  text: string;
+  lead?: string;
+}
+const { text, lead } = Astro.props;
+---
+
+<div class="ornament">
+  <h1><span class="gem" aria-hidden="true">&#9672;</span>{text}<span class="gem" aria-hidden="true"
+      >&#9672;</span
+    ></h1>
+  <div class="rule" aria-hidden="true"><i></i><i></i></div>
+  {lead && <p class="lead">{lead}</p>}
+</div>
+
+<style>
+  .ornament {
+    text-align: center;
+    margin: 2.75rem 0 2.5rem;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(1.95rem, 6vw, 3rem);
+    letter-spacing: -0.015em;
+  }
+
+  .gem {
+    /* In the light scheme --muted reads as almost invisible against the
+       parchment; the game's own diamonds are clearly present, so the light
+       scheme uses --gold instead. The dark scheme already read correctly
+       with --muted, so it keeps that value. */
+    color: var(--gold);
+    font-size: 0.54em;
+    margin: 0 0.62em;
+    vertical-align: 0.28em;
+    font-weight: 400;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .gem {
+      color: var(--muted);
+    }
+  }
+
+  .rule {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    margin-top: 0.9rem;
+  }
+
+  .rule i {
+    display: block;
+    height: 2px;
+  }
+
+  /* The long rule is engraved, so it fades out at both ends; the short one
+     under it is solid. Two lines, exactly as the game draws them. */
+  .rule i:first-child {
+    width: min(30rem, 88%);
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--rule) 12%,
+      var(--rule) 88%,
+      transparent 100%
+    );
+  }
+
+  .rule i:last-child {
+    width: min(15rem, 48%);
+    background: var(--rule);
+  }
+
+  .lead {
+    max-width: 46ch;
+    margin: 1.25rem auto 0;
+    color: var(--muted-text);
+    font-size: 1.02rem;
+  }
+</style>

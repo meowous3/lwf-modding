@@ -1,0 +1,65 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { href } from '../lib/url';
+import { downloadUrl, latestTag } from '../lib/release';
+
+interface Props {
+  mod: CollectionEntry<'mods'>;
+}
+const { mod } = Astro.props;
+const tag = await latestTag(mod.data.repo, mod.data.version);
+---
+
+<article class="panel card">
+  <div class="head">
+    <h2><a href={href(`mods/${mod.id}`)}>{mod.data.title}</a></h2>
+    {tag && <span class="tag">{tag}</span>}
+  </div>
+  <p class="summary">{mod.data.summary}</p>
+  <div class="actions">
+    <a class="btn" href={downloadUrl(mod.data.repo, mod.data.dll)} download>Download</a>
+    <a class="btn ghost" href={href(`mods/${mod.id}`)}>Details</a>
+  </div>
+</article>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+  h2 a {
+    color: var(--ink-inverse);
+    text-decoration: none;
+  }
+  h2 a:hover {
+    color: #fff;
+  }
+  .tag {
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .summary {
+    margin: 0;
+    flex-grow: 1;
+    color: var(--ink-on-surface-muted);
+  }
+  .actions {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-top: 0.25rem;
+  }
+</style>

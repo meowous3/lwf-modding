@@ -1,0 +1,32 @@
+{
+  "name": "lwf-modding",
+  "version": "1.0.0",
+  "description": "Notes from modding **Lazy Witch's Factory** with BepInEx 5. Unity 6000.0.80f1, Mono, x64.",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "check": "node --test \"tests/**/*.test.mjs\"",
+    "test": "astro build && node --test \"tests/**/*.test.mjs\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meowous3/lwf-modding.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/meowous3/lwf-modding/issues"
+  },
+  "homepage": "https://github.com/meowous3/lwf-modding#readme",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@astrojs/markdown-satteri": "^0.3.7",
+    "astro": "7.2.4",
+    "github-slugger": "^2.0.0"
+  }
+}

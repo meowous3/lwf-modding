@@ -1,7 +1,11 @@
-# Notes on the game
+---
+title: Modding reference
+blurb: What the game is made of and where it gives way — architecture, the seams worth patching, and the traps found the hard way.
+order: 2
+---
 
 What the game is made of and where it gives way. Assumes a plugin that already loads — if you
-do not have one yet, start with [Your first mod](GETTING-STARTED.md).
+do not have one yet, start with [Your first mod](first-mod.md).
 
 Unity 6000.0.80f1, Mono, x64. Steam app `3971650` (demo: `4638750`).
 

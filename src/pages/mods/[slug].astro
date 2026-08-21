@@ -1,0 +1,46 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Ornament from '../../components/Ornament.astro';
+import { downloadUrl, latestTag } from '../../lib/release';
+import { href } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const mods = await getCollection('mods');
+  return mods.map((mod) => ({ params: { slug: mod.id }, props: { mod } }));
+}
+
+const { mod } = Astro.props;
+const { Content } = await render(mod);
+const tag = await latestTag(mod.data.repo, mod.data.version);
+---
+
+<Base title={`${mod.data.title} — Lazy Witch's Factory modding`} description={mod.data.summary}>
+  <Ornament text={mod.data.title} lead={mod.data.summary} />
+
+  <div class="bar">
+    <a class="btn" href={downloadUrl(mod.data.repo, mod.data.dll)} download>
+      Download{tag ? ` ${tag}` : ''}
+    </a>
+    <a class="btn ghost" href={href('install')}>How to install</a>
+    <a class="btn ghost" href={`https://github.com/${mod.data.repo}`}>Source</a>
+    <span class="built">Built against {mod.data.gameVersion}</span>
+  </div>
+
+  <article class="prose"><Content /></article>
+</Base>
+
+<style>
+  .bar {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+  }
+  .built {
+    color: var(--muted-text);
+    font-size: 0.85rem;
+  }
+</style>

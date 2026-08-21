@@ -1,0 +1,174 @@
+/* ---------------------------------------------------------------------------
+   Rendered Markdown.
+
+   A code block is a plaque, the same material as every other panel, because
+   this site is mostly C#, XML, INI and shell and those blocks are the page's
+   main structure. Tables stay engraved on the parchment instead, so a page of
+   prose never turns into a wall of dark rectangles.
+   --------------------------------------------------------------------------- */
+
+.prose {
+  max-width: var(--measure);
+  margin-inline: auto;
+  overflow-wrap: break-word;
+}
+
+.prose > :first-child {
+  margin-top: 0;
+}
+
+.prose h2 {
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  font-size: 1.45rem;
+}
+
+.prose h3 {
+  margin-top: 2.25rem;
+  font-size: 1.12rem;
+  font-weight: 700;
+}
+
+.prose li::marker {
+  color: var(--gold);
+}
+
+.prose li + li {
+  margin-top: 0.35rem;
+}
+
+.prose strong {
+  font-weight: 800;
+}
+
+.prose hr {
+  border: 0;
+  height: 2px;
+  width: min(18rem, 55%);
+  margin: 2.5rem auto;
+  background: var(--rule);
+}
+
+/* --- Code --------------------------------------------------------------- */
+
+.prose :not(pre) > code {
+  background: var(--surface);
+  color: var(--ink-inverse);
+  padding: 0.12em 0.42em;
+  border-radius: 5px;
+  box-shadow: 0 0 0 1px var(--plaque-ring);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+.prose pre {
+  position: relative;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 1rem 1.15rem 1.05rem;
+  margin: 1.5rem 0;
+  max-width: 100%;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  line-height: 1.6;
+  tab-size: 2;
+  scrollbar-color: var(--surface-lip) transparent;
+  box-shadow:
+    inset 0 1px 0 var(--surface-lip),
+    0 0 0 1px var(--plaque-ring),
+    var(--plaque) var(--plaque) 0 var(--surface-edge);
+}
+
+.prose pre code {
+  font-family: inherit;
+}
+
+/* The language is real information on a site that mixes four of them. Kept in
+   flow rather than absolutely positioned, so it cannot be scrolled out of the
+   corner of a wide block. */
+.prose pre[data-language]:not([data-language='plaintext'])::before {
+  content: attr(data-language);
+  display: block;
+  margin-bottom: 0.7rem;
+  font-family: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-text);
+}
+
+/* Shiki runs with `defaultColor: false`, so every token carries both palettes
+   as custom properties. Pick one per colour scheme and the highlighting
+   follows the scheme with no JavaScript at all.
+
+   The theme's own background (--shiki-*-bg) is deliberately ignored: the block
+   keeps --surface, so a code plaque is exactly the same material as a panel. */
+.prose pre,
+.prose pre span {
+  color: var(--shiki-light);
+}
+
+@media (prefers-color-scheme: dark) {
+  .prose pre,
+  .prose pre span {
+    color: var(--shiki-dark);
+  }
+}
+
+/* --- Tables ------------------------------------------------------------- */
+
+.prose table {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+}
+
+.prose th,
+.prose td {
+  border: 1px solid var(--rule);
+  padding: 0.45rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose th {
+  font-weight: 800;
+  border-bottom-color: var(--muted);
+  white-space: nowrap;
+}
+
+/* --- Quotes, media, anchors --------------------------------------------- */
+
+.prose blockquote {
+  margin: 1.5rem 0;
+  padding: 0.1rem 0 0.1rem 1.1rem;
+  border-left: 3px solid var(--ember);
+  color: var(--muted-text);
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+}
+
+.prose .anchor {
+  margin-left: 0.4rem;
+  opacity: 0;
+  text-decoration: none;
+  font-family: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+}
+
+.prose h2:hover .anchor,
+.prose h3:hover .anchor,
+.prose .anchor:focus-visible {
+  opacity: 0.6;
+}
