@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { readdir, readFile } from 'node:fs/promises';
 
 const DIST = new URL('../dist/', import.meta.url);
@@ -115,11 +116,25 @@ for (const slug of slugs) {
   });
 }
 
-test('the mod without a screenshot renders no image element at all', () => {
-  const front = pages['camera-zoom'];
-  const body = /<div class="body[^"]*"[^>]*>([\s\S]*?)<article/.exec(front);
-  assert.ok(body, 'the content column is missing');
-  assert.equal(body[1].trim(), '', 'an empty screenshot slot was left behind');
+test('a screenshot renders only where one is declared', () => {
+  // Written against camera-zoom back when it had no screenshot, which made the test a fact
+  // about that mod rather than about the rule. Every mod has one now, so it asserted the
+  // opposite of the truth. The rule itself: the slot is filled when the frontmatter names an
+  // image and empty when it does not, whichever mods happen to exist.
+  for (const slug of slugs) {
+    const body = /<div class="body[^"]*"[^>]*>([\s\S]*?)<article/.exec(pages[slug]);
+    assert.ok(body, `${slug}: the content column is missing`);
+
+    const declared = readFileSync(new URL(`../mods/${slug}.md`, import.meta.url), 'utf8')
+      .split('---')[1]
+      .includes('screenshot:');
+
+    if (declared) {
+      assert.match(body[1], /<img class="shot"[^>]*src="[^"]+"/, `${slug}: the screenshot is missing`);
+    } else {
+      assert.equal(body[1].trim(), '', `${slug}: an empty screenshot slot was left behind`);
+    }
+  }
 });
 
 test('the sidebar precedes the article in the markup, so it lands above it on a phone', () => {
