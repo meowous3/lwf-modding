@@ -107,3 +107,17 @@ test('each mod page offers the permanent-redirect download', () => {
     'the download link is not the permanent redirect',
   );
 });
+
+test('the Proton launch option is on the install page', () => {
+  const install = docs.find((d) => d.path === 'install/index.html');
+  assert.ok(install, 'install/index.html was not built');
+  assert.match(install.html, /WINEDLLOVERRIDES/, 'the launch option is missing from /install/');
+});
+
+test('the install steps are not duplicated in the developer guide', () => {
+  const firstMod = docs.find((d) => d.path === 'guides/first-mod/index.html');
+  assert.ok(
+    !firstMod.html.includes('WINEDLLOVERRIDES'),
+    'the launch option is still duplicated in guides/first-mod',
+  );
+});

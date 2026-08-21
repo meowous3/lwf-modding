@@ -22,4 +22,12 @@ const mods = defineCollection({
   }),
 });
 
-export const collections = { guides, mods };
+const pages = defineCollection({
+  loader: glob({ pattern: '*.md', base: './pages' }),
+  schema: z.object({
+    title: z.string(),
+    summary: z.string(),
+  }),
+});
+
+export const collections = { guides, mods, pages };
