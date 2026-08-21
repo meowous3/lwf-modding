@@ -1,0 +1,78 @@
+---
+import Base from './Base.astro';
+import Ornament from '../components/Ornament.astro';
+import Sidebar from '../components/Sidebar.astro';
+import Toc from '../components/Toc.astro';
+import PrevNext from '../components/PrevNext.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  slug: string;
+  headings: { depth: number; slug: string; text: string }[];
+}
+const { title, description, slug, headings } = Astro.props;
+---
+
+<Base title={`${title} — Lazy Witch's Factory modding`} description={description} wide>
+  <Ornament text={title} />
+  <div class="doc">
+    <aside>
+      <Sidebar slug={slug} headings={headings} />
+    </aside>
+    <div class="content">
+      <div class="inline-toc"><Toc headings={headings} /></div>
+      <article class="prose"><slot /></article>
+      <PrevNext slug={slug} />
+    </div>
+  </div>
+</Base>
+
+<style>
+  .doc {
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr);
+    gap: 3rem;
+    align-items: start;
+  }
+  aside {
+    position: sticky;
+    top: 1.5rem;
+  }
+  .inline-toc {
+    display: none;
+  }
+  .inline-toc :global(.toc) {
+    padding: 0.9rem 1.1rem;
+    background: var(--surface);
+    color: var(--ink-inverse);
+    border-radius: var(--radius);
+    box-shadow:
+      inset 0 1px 0 var(--surface-lip),
+      0 0 0 1px var(--plaque-ring),
+      var(--plaque) var(--plaque) 0 var(--surface-edge);
+  }
+  .inline-toc :global(.toc a) {
+    color: var(--ink-on-surface-muted);
+  }
+  .inline-toc :global(.toc a:hover) {
+    color: var(--ink-inverse);
+  }
+
+  @media (max-width: 900px) {
+    .doc {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.5rem;
+    }
+    aside {
+      position: static;
+    }
+    aside :global(.toc) {
+      display: none;
+    }
+    .inline-toc {
+      display: block;
+      margin-bottom: 2rem;
+    }
+  }
+</style>

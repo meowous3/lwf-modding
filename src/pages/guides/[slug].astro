@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
+import Doc from '../../layouts/Doc.astro';
 
 export async function getStaticPaths() {
   const guides = await getCollection('guides');
@@ -7,13 +8,9 @@ export async function getStaticPaths() {
 }
 
 const { guide } = Astro.props;
-const { Content } = await render(guide);
+const { Content, headings } = await render(guide);
 ---
-<!doctype html>
-<html lang="en">
-  <head><meta charset="utf-8" /><title>{guide.data.title}</title></head>
-  <body>
-    <h1>{guide.data.title}</h1>
-    <Content />
-  </body>
-</html>
+
+<Doc title={guide.data.title} description={guide.data.blurb} slug={guide.id} headings={headings}>
+  <Content />
+</Doc>

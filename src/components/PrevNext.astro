@@ -1,0 +1,48 @@
+---
+import { getCollection } from 'astro:content';
+import { href } from '../lib/url';
+
+interface Props {
+  slug: string;
+}
+const guides = (await getCollection('guides')).sort((a, b) => a.data.order - b.data.order);
+const i = guides.findIndex((g) => g.id === Astro.props.slug);
+const prev = guides[i - 1];
+const next = guides[i + 1];
+---
+
+<nav class="prevnext" aria-label="Guide navigation">
+  {
+    prev ? (
+      <a rel="prev" href={href(`guides/${prev.id}`)}>
+        &larr; {prev.data.title}
+      </a>
+    ) : (
+      <span />
+    )
+  }
+  {
+    next && (
+      <a rel="next" href={href(`guides/${next.id}`)}>
+        {next.data.title} &rarr;
+      </a>
+    )
+  }
+</nav>
+
+<style>
+  .prevnext {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 3rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--rule);
+    max-width: var(--measure);
+    margin-inline: auto;
+  }
+  .prevnext a {
+    font-weight: 800;
+    text-decoration: none;
+  }
+</style>

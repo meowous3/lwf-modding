@@ -1,0 +1,77 @@
+---
+import { getCollection } from 'astro:content';
+import { href } from '../lib/url';
+import Toc from './Toc.astro';
+
+interface Props {
+  slug: string;
+  headings: { depth: number; slug: string; text: string }[];
+}
+const { slug, headings } = Astro.props;
+const guides = (await getCollection('guides')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<nav class="sidebar panel" aria-label="Guides">
+  <p class="heading">Guides</p>
+  <ul>
+    {
+      guides.map((g) => (
+        <li>
+          <a href={href(`guides/${g.id}`)} aria-current={g.id === slug ? 'page' : undefined}>
+            {g.data.title}
+          </a>
+          {g.id === slug && <Toc headings={headings} />}
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<style>
+  .sidebar {
+    padding: 1.1rem 1.15rem;
+  }
+
+  .heading {
+    margin: 0 0 0.6rem;
+    font-family: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .sidebar ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .sidebar > ul > li {
+    margin-bottom: 0.6rem;
+  }
+  .sidebar > ul > li > a {
+    display: block;
+    padding: 0.3rem 0.5rem;
+    border-radius: 7px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+    color: var(--ink-on-surface-muted);
+  }
+  .sidebar > ul > li > a:hover {
+    color: var(--ink-inverse);
+    background: var(--surface-lip);
+  }
+  .sidebar > ul > li > a[aria-current='page'] {
+    color: var(--ink-inverse);
+    background: var(--ember-fill);
+    box-shadow: inset 0 0 0 1px var(--ember);
+  }
+
+  .sidebar :global(.toc) {
+    margin: 0.35rem 0 0 1rem;
+    border-left: 2px solid var(--surface-lip);
+    padding-left: 0.65rem;
+  }
+</style>

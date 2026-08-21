@@ -31,11 +31,21 @@ const { text, lead } = Astro.props;
   }
 
   .gem {
-    color: var(--muted);
+    /* In the light scheme --muted reads as almost invisible against the
+       parchment; the game's own diamonds are clearly present, so the light
+       scheme uses --gold instead. The dark scheme already read correctly
+       with --muted, so it keeps that value. */
+    color: var(--gold);
     font-size: 0.54em;
     margin: 0 0.62em;
     vertical-align: 0.28em;
     font-weight: 400;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .gem {
+      color: var(--muted);
+    }
   }
 
   .rule {

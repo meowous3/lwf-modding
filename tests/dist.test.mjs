@@ -173,3 +173,15 @@ test('long lines scroll inside the code block, not the page', () => {
   assert.match(css, /\.prose pre\{[^}]*overflow-x:auto/, '.prose pre does not scroll its own overflow');
   assert.match(css, /\.prose table\{[^}]*overflow-x:auto/, '.prose table does not scroll its own overflow');
 });
+
+test('every guide page carries the full guide list and its own headings', () => {
+  const guide = docs.find((d) => d.path === 'guides/first-mod/index.html');
+  assert.match(guide.html, /Modding reference/, 'the sidebar does not list sibling guides');
+  assert.match(guide.html, /class="toc/, 'the guide has no table of contents');
+});
+
+test('guides link to their neighbours', () => {
+  const guide = docs.find((d) => d.path === 'guides/reference/index.html');
+  assert.match(guide.html, /rel="prev"/, 'no previous link');
+  assert.match(guide.html, /rel="next"/, 'no next link');
+});

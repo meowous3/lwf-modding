@@ -1,0 +1,44 @@
+---
+interface Props {
+  headings: { depth: number; slug: string; text: string }[];
+}
+// `headingAnchors` (src/lib/markdown-plugins.mjs) appends a literal "#" permalink
+// child to every h2/h3 before Astro's own heading-id plugin walks the tree to
+// build this `headings` list, so `text` here carries a trailing "#" that has no
+// business in a table-of-contents caption. Strip it back off.
+const items = Astro.props.headings
+  .filter((h) => h.depth === 2)
+  .map((h) => ({ ...h, text: h.text.replace(/\s*#$/, '') }));
+---
+
+{
+  items.length > 1 && (
+    <nav class="toc" aria-label="On this page">
+      <ol>
+        {items.map((h) => (
+          <li>
+            <a href={`#${h.slug}`}>{h.text}</a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
+}
+
+<style>
+  .toc ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .toc a {
+    display: block;
+    padding: 0.15rem 0;
+    font-size: 0.9rem;
+    text-decoration: none;
+    color: var(--muted-text);
+  }
+  .toc a:hover {
+    color: var(--ember);
+  }
+</style>
