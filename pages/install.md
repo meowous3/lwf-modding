@@ -11,7 +11,7 @@ in a folder.
 BepInEx is the mod loader. It hooks into the game at startup and loads any plugin DLLs you've
 put in its `plugins` folder.
 
-Download [BepInEx 5.4.23.5, `win_x64`](https://github.com/BepInEx/BepInEx/releases/tag/v5.4.23.5)
+Download [BepInEx 5.4.23.5, `win_x64`](https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip)
 and extract it into your game folder — the one with `LazyWitchsFactory.exe` in it, not a
 subfolder. If you're on Linux, still grab the Windows build; the game runs through Proton, so
 it's a Windows process either way.
