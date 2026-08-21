@@ -19,6 +19,8 @@ const mods = defineCollection({
     summary: z.string(),
     gameVersion: z.string(),
     version: z.string().optional(),
+    screenshot: z.string().optional(),
+    screenshotAlt: z.string().optional(),
   }),
 });
 

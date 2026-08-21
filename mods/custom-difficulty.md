@@ -5,6 +5,8 @@ dll: LwfCustomDifficulty.dll
 summary: A difficulty whose time limit, repayments, growth curve and taxes you set in-game.
 gameVersion: "0.21.0"
 version: v0.2.0
+screenshot: mods/custom-difficulty.png
+screenshotAlt: The difficulty screen with the Custom options panel beside the Custom card
 ---
 
 Adds a **Custom** difficulty, the leftmost card in the carousel. Set its time limit, repayment

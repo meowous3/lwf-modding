@@ -27,6 +27,15 @@ const tag = await latestTag(mod.data.repo, mod.data.version);
     <span class="built">Built against {mod.data.gameVersion}</span>
   </div>
 
+  {mod.data.screenshot && (
+    <img
+      class="shot"
+      src={href(mod.data.screenshot)}
+      alt={mod.data.screenshotAlt ?? `${mod.data.title} in game`}
+      loading="lazy"
+    />
+  )}
+
   <article class="prose"><Content /></article>
 </Base>
 
@@ -42,5 +51,13 @@ const tag = await latestTag(mod.data.repo, mod.data.version);
   .built {
     color: var(--muted-text);
     font-size: 0.85rem;
+  }
+  .shot {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0 0 2.5rem;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
   }
 </style>
