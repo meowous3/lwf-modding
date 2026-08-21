@@ -4,7 +4,7 @@ blurb: The same ground as a working protocol — verify targets by reflection, m
 order: 3
 ---
 
-Protocol and facts. Human version: `MODDING.md`.
+Protocol and facts. Human version: `reference.md`.
 
 ## Target
 

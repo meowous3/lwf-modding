@@ -2,11 +2,12 @@
 
 Notes from modding **Lazy Witch's Factory** with BepInEx 5. Unity 6000.0.80f1, Mono, x64.
 
-- [`guides/GETTING-STARTED.md`](guides/GETTING-STARTED.md) — start here. Nothing to a working plugin, step by step.
-- [`guides/MODDING.md`](guides/MODDING.md) — notes on how the game is put together and where it gives way.
-- [`guides/AGENTS.md`](guides/AGENTS.md) — the same ground as protocol, for coding agents.
+**https://meowous3.github.io/lwf-modding/**
 
-Rendered, with the mods: **https://meowous3.github.io/lwf-modding/**
+- [`pages/install.md`](pages/install.md) — installing mods. Start here if you just want to play.
+- [`guides/first-mod.md`](guides/first-mod.md) — nothing to a working plugin, step by step.
+- [`guides/reference.md`](guides/reference.md) — how the game is put together and where it gives way.
+- [`guides/agents.md`](guides/agents.md) — the same ground as protocol, for coding agents.
 
 ## Mods
 
@@ -14,7 +15,17 @@ Rendered, with the mods: **https://meowous3.github.io/lwf-modding/**
 |---|---|
 | [lwf-custom-difficulty](https://github.com/meowous3/lwf-custom-difficulty) | A difficulty whose time limit, repayments, growth curve and taxes you set in-game. |
 
-Add one by appending its `owner/repo` to [`mods.json`](mods.json); the site reads the description, README and latest release `.dll` from GitHub. A guide is an entry in [`guides.json`](guides.json).
+## Adding to the site
+
+A mod is a Markdown file in [`mods/`](mods); a guide is one in [`guides/`](guides). Both are
+plain frontmatter plus prose — see an existing file. Download links resolve to each repo's
+latest release automatically, so publishing a release is enough.
+
+```bash
+npm install
+npm run dev     # local preview
+npm test        # build, then verify the built output
+```
 
 ## Licence
 

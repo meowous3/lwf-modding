@@ -220,3 +220,16 @@ test('every mod summary renders on the home page — none depends on a null GitH
     );
   }
 });
+
+test('old URLs redirect rather than 404', () => {
+  for (const [file, target] of [
+    ['mods.html', '/lwf-modding/'],
+    ['guides.html', '/lwf-modding/guides/'],
+    ['mod.html', '/lwf-modding/'],
+    ['guide.html', '/lwf-modding/guides/'],
+  ]) {
+    const doc = docs.find((d) => d.path === file);
+    assert.ok(doc, `${file} shim was not built`);
+    assert.ok(doc.html.includes(target), `${file} does not point at ${target}`);
+  }
+});
