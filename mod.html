@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mod — Lazy Witch's Factory modding</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧪</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="index.html">Lazy Witch&rsquo;s Factory <span>modding</span></a>
+    <nav>
+      <a href="mods.html" class="on">Mods</a>
+      <a href="guides.html">Guides</a>
+      <a href="https://github.com/meowous3/lwf-modding">GitHub</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap">
+  <p class="crumb"><a href="mods.html">&larr; Mods</a></p>
+  <div class="page-head">
+    <div>
+      <h1 id="title">&nbsp;</h1>
+      <p class="desc" id="desc"></p>
+    </div>
+    <div class="actions" id="actions"></div>
+  </div>
+  <article id="body" class="md panel"><p class="loading">Loading&hellip;</p></article>
+</main>
+<script type="module">
+import { manifest, readme, repoInfo, latestRelease, downloadButton, escape } from './lib.js';
+
+const repo = new URLSearchParams(location.search).get('r') || '';
+const body = document.getElementById('body');
+
+(async () => {
+  // Only render a repo this site lists. The name reaches the DOM and the network, so an
+  // arbitrary one from the query string is not something to pass through.
+  const { mods } = await manifest('mods').catch(() => ({ mods: [] }));
+  if (!mods.includes(repo)) {
+    document.getElementById('title').textContent = 'Not found';
+    body.innerHTML = '<p class="error">No such mod. <a href="mods.html">Back to mods.</a></p>';
+    return;
+  }
+
+  const name = repo.split('/')[1];
+  document.title = name + ' — Lazy Witch’s Factory modding';
+  document.getElementById('title').textContent = name;
+
+  const [info, release] = await Promise.all([
+    repoInfo(repo).catch(() => ({})),
+    latestRelease(repo).catch(() => null),
+  ]);
+  document.getElementById('desc').textContent = info.description || '';
+  document.getElementById('actions').innerHTML =
+    downloadButton(release) + ` <a class="btn ghost" href="https://github.com/${escape(repo)}">Source</a>`;
+
+  try {
+    body.innerHTML = await readme(repo);
+  } catch {
+    body.innerHTML = `<p class="error">Could not load the README. <a href="https://github.com/${escape(repo)}">Read it on GitHub.</a></p>`;
+  }
+})();
+</script>
+<footer class="wrap">
+  <p>MIT. Not affiliated with the developers of Lazy Witch&rsquo;s Factory.</p>
+</footer>
+</body>
+</html>

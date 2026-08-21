@@ -13,7 +13,7 @@ Rendered, with the mods: **https://meowous3.github.io/lwf-modding/**
 |---|---|
 | [lwf-custom-difficulty](https://github.com/meowous3/lwf-custom-difficulty) | A difficulty whose time limit, repayments, growth curve and taxes you set in-game. |
 
-Add one by appending its `owner/repo` to [`mods.json`](mods.json); the site reads the README and the latest release from GitHub.
+Add one by appending its `owner/repo` to [`mods.json`](mods.json); the site reads the description, README and latest release `.dll` from GitHub. A guide is an entry in [`guides.json`](guides.json).
 
 ## Licence
 

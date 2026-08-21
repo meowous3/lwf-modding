@@ -1,0 +1,18 @@
+{
+  "guides": [
+    {
+      "slug": "modding",
+      "title": "Modding guide",
+      "audience": "For people",
+      "file": "guides/MODDING.md",
+      "blurb": "How the game is put together, what can be changed, and the traps that cost the most time."
+    },
+    {
+      "slug": "agents",
+      "title": "Agent protocol",
+      "audience": "For coding agents",
+      "file": "guides/AGENTS.md",
+      "blurb": "The same ground as a working protocol: verify targets by reflection, measure before patching, log applied values."
+    }
+  ]
+}

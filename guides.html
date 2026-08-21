@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lazy Witch's Factory — modding</title>
-<meta name="description" content="BepInEx mods and modding guides for Lazy Witch's Factory.">
+<title>Guides — Lazy Witch's Factory modding</title>
+<meta name="description" content="Modding guides for Lazy Witch's Factory.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧪</text></svg>">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -14,38 +14,17 @@
     <a class="brand" href="index.html">Lazy Witch&rsquo;s Factory <span>modding</span></a>
     <nav>
       <a href="mods.html">Mods</a>
-      <a href="guides.html">Guides</a>
+      <a href="guides.html" class="on">Guides</a>
       <a href="https://github.com/meowous3/lwf-modding">GitHub</a>
     </nav>
   </div>
 </header>
 <main class="wrap">
-  <section class="hero">
-    <h1>Mods and modding notes</h1>
-    <p>BepInEx 5 plugins for <b>Lazy Witch&rsquo;s Factory</b>, and what was learned building them.</p>
-  </section>
-
-  <section>
-    <div class="head"><h2>Mods</h2><a class="more" href="mods.html">All mods</a></div>
-    <div id="mods" class="grid"><p class="loading">Loading&hellip;</p></div>
-  </section>
-
-  <section>
-    <div class="head"><h2>Guides</h2><a class="more" href="guides.html">All guides</a></div>
-    <div id="guides" class="grid"><p class="loading">Loading&hellip;</p></div>
-  </section>
+  <h1>Guides</h1>
+  <div id="guides" class="grid"><p class="loading">Loading&hellip;</p></div>
 </main>
 <script type="module">
-import { manifest, modCard, el, escape } from './lib.js';
-
-(async () => {
-  const host = document.getElementById('mods');
-  try {
-    const { mods } = await manifest('mods');
-    host.replaceChildren(...await Promise.all(mods.map(modCard)));
-  } catch { host.innerHTML = '<p class="error">Could not load the mod list.</p>'; }
-})();
-
+import { manifest, el, escape } from './lib.js';
 (async () => {
   const host = document.getElementById('guides');
   try {
