@@ -1,18 +1,16 @@
 # Your first mod
 
-From nothing to a plugin you can see working, in about fifteen minutes. Every step ends with
-something you can check, so a mistake shows up where it happened rather than three steps later.
+Nothing to a working plugin. Every step ends with something to check.
 
-You need the [.NET SDK](https://dotnet.microsoft.com/download) (8 or newer) and the game.
+Needs the [.NET SDK](https://dotnet.microsoft.com/download) 8+ and the game.
 
 ## 1. Install BepInEx
 
-Download **[BepInEx 5.4.23.5, `win_x64`](https://github.com/BepInEx/BepInEx/releases/tag/v5.4.23.5)**
-and extract it into the game folder — the one with the `.exe` in it, not a subfolder.
+Extract **[BepInEx 5.4.23.5, `win_x64`](https://github.com/BepInEx/BepInEx/releases/tag/v5.4.23.5)**
+into the game folder — the one with the `.exe`, not a subfolder. Use the Windows build on Linux
+too; the game runs under Proton.
 
-Take the Windows build even on Linux. The game runs under Proton, so it is a Windows process.
-
-Right afterwards the folder contains:
+BepInEx 6 has a different API. Everything here assumes 5.
 
 ```
 LazyWitchsFactory.exe
@@ -21,37 +19,20 @@ doorstop_config.ini
 BepInEx/
 ```
 
-**Version matters.** BepInEx 6 is a different loader with a different API; this guide and
-everything in the notes assumes 5.
+On Linux, add `WINEDLLOVERRIDES="winhttp=n,b" %command%` to the game's Steam launch options.
+Without it nothing loads and nothing errors — the game just runs unmodded.
 
-## 2. Linux only: the launch option
+## 2. Run the game once
 
-Right-click the game in Steam → Properties → Launch Options:
-
-```
-WINEDLLOVERRIDES="winhttp=n,b" %command%
-```
-
-Without it Proton ignores `winhttp.dll` and **nothing loads, with no error** — the game just
-runs unmodded. This is the single most common reason a first plugin appears to do nothing.
-
-## 3. Run the game once
-
-Start it, reach the title screen, quit. BepInEx generates its folders on first run:
-
-```
-BepInEx/config/     BepInEx/core/     BepInEx/plugins/     BepInEx/LogOutput.log
-```
-
-Check it loaded:
+To the title screen and quit. BepInEx writes its folders on first run.
 
 ```bash
 grep "Chainloader started" "<game>/BepInEx/LogOutput.log"
 ```
 
-A hit means BepInEx is running. No `LogOutput.log` at all on Linux means step 2 was missed.
+No log file at all on Linux means the launch option is missing.
 
-While you are here, open `BepInEx/config/BepInEx.cfg` and set:
+In `BepInEx/config/BepInEx.cfg`:
 
 ```ini
 [Logging.Disk]
@@ -59,29 +40,27 @@ WriteUnityLog = true
 AppendLog = true
 ```
 
-The first sends the game's own exceptions to your log, which you will want the first time
-something throws. The second stops each launch from overwriting the last one's evidence.
+`WriteUnityLog` puts the game's own exceptions in your log. `AppendLog` stops each launch
+overwriting the last.
 
-## 4. Make a project
+## 3. Make a project
 
 ```bash
-mkdir -p mymod/src/MyMod && cd mymod
+mkdir -p mymod && cd mymod
 dotnet new classlib -o src/MyMod -f netstandard2.1
 rm src/MyMod/Class1.cs
 ```
 
-**`netstandard2.1`, not 2.0.** The game binds `netstandard 2.1.0.0`; 2.0 fails to build with
-`CS1705`.
+**netstandard2.1**, not 2.0 — the game binds `netstandard 2.1.0.0` and 2.0 fails with `CS1705`.
 
-`Directory.Build.props` in the root — the game path is the only line you edit:
+`Directory.Build.props`:
 
 ```xml
 <Project>
   <PropertyGroup>
     <GameDir>$(HOME)/.local/share/Steam/steamapps/common/Lazy Witch's Factory</GameDir>
 
-    <!-- Located, not named: the full release is LazyWitchsFactory_Data and the demo is
-         LazyWitchFactory_Data. Note the extra s. -->
+    <!-- Full release is LazyWitchsFactory_Data, demo is LazyWitchFactory_Data. -->
     <GameDataDir>$([System.IO.Directory]::GetDirectories($(GameDir), '*_Data'))</GameDataDir>
     <GameManagedDir>$(GameDataDir)/Managed</GameManagedDir>
     <BepInExCoreDir>$(GameDir)/BepInEx/core</BepInExCoreDir>
@@ -89,9 +68,7 @@ rm src/MyMod/Class1.cs
 </Project>
 ```
 
-On Windows set `<GameDir>C:\Program Files (x86)\Steam\steamapps\common\Lazy Witch's Factory</GameDir>`.
-
-Replace `src/MyMod/MyMod.csproj` with:
+`src/MyMod/MyMod.csproj`:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -109,10 +86,10 @@ Replace `src/MyMod/MyMod.csproj` with:
 </Project>
 ```
 
-`Private=false` on every game reference. Without it the build copies the game's assemblies
-next to your DLL, and BepInEx loads those copies instead of the real ones.
+`Private=false` on every game reference, or the build copies the game's assemblies next to your
+DLL and BepInEx loads the copies.
 
-## 5. Write the plugin
+## 4. Write the plugin
 
 `src/MyMod/Plugin.cs`:
 
@@ -134,36 +111,32 @@ namespace MyMod
 }
 ```
 
-The GUID must be unique across every plugin installed, so use a domain-ish prefix.
+The GUID must be unique across installed plugins.
 
-## 6. Build and install
+## 5. Build and install
 
 ```bash
 dotnet build -c Release src/MyMod/MyMod.csproj
 cp src/MyMod/bin/Release/netstandard2.1/MyMod.dll "<game>/BepInEx/plugins/"
 ```
 
-## 7. Check it loaded
-
-Run the game to the title screen, quit, then:
+## 6. Check it loaded
 
 ```bash
 grep "My Mod" "<game>/BepInEx/LogOutput.log"
 ```
-
-Expected:
 
 ```
 [Info   :   BepInEx] Loading [My Mod 0.1.0]
 [Info   :    My Mod] My Mod loaded.
 ```
 
-Only the first line means `Awake` threw — the exception is in the log just after it. Neither
-line means the DLL is not in `plugins/`, or it targets the wrong framework.
+Only the first line: `Awake` threw, and the exception follows it. Neither line: the DLL is not
+in `plugins/`, or it targets the wrong framework.
 
-## 8. Change something
+## 7. Change something
 
-Add `src/MyMod/DoubleRewards.cs`:
+`src/MyMod/DoubleRewards.cs`:
 
 ```csharp
 using HarmonyLib;
@@ -179,15 +152,15 @@ namespace MyMod
 }
 ```
 
-Rebuild, copy, run, and open the difficulty selection screen: **Salary** reads `x2.00` where it
-read `x1.00`. The results screen pays it too — both go through this one method.
+Rebuild, copy, run. **Salary** on the difficulty screen reads `x2.00`. The results screen pays
+it — both call this method.
 
-A `Postfix` runs after the original and can edit `__result`. A `Prefix` runs before and can skip
-the original by returning `false`.
+`Postfix` runs after the original and can edit `__result`. `Prefix` runs before and skips the
+original by returning `false`.
 
-## 9. Find your own targets
+## 8. Find your own targets
 
-Decompile the game and read it. It is not obfuscated, so the class and method names are real.
+The game is not obfuscated, so decompiled names are the real ones.
 
 ```bash
 dotnet tool install -g ilspycmd
@@ -195,19 +168,14 @@ ilspycmd -p -o ./decomp -r "<game>/<data>/Managed" "<game>/<data>/Managed/Assemb
 grep -rn "GetDifficultyMultiplier" ./decomp
 ```
 
-Read the method before patching it. Do not guess a signature — `[HarmonyPatch]` arguments are
-not checked by the compiler, so a wrong one builds cleanly and then binds nothing.
+Read the method before patching it. `[HarmonyPatch]` arguments are not compiler-checked — a
+wrong one builds clean and binds nothing.
 
-## 10. Before you trust it
+## 9. Three things that waste days
 
-Three things cost more time than everything else combined:
+- **A patch that never runs.** Mono inlines small methods; a patch on one reports as applied and
+  never fires. Log a value read back off the object, not the value you meant to write.
+- **No log on Linux.** The launch option.
+- **A save you cannot undo.** Back up `SaveData/` before running anything that writes progression.
 
-- **A patch that never runs.** Mono inlines small methods, and a patch on an inlined method
-  reports as applied and never fires. Log a value you read back from the object, not the value
-  you meant to write, so the log distinguishes "it worked" from "it was ignored".
-- **A silent Linux install.** No log at all is step 2, every time.
-- **A save you cannot undo.** Anything writing progression deserves checking before you run it
-  on a save you care about. Back up `SaveData/` first.
-
-Then read the [notes](MODDING.md) — the architecture, the seams worth patching, and the traps
-found the hard way.
+Then: [the notes](MODDING.md).
