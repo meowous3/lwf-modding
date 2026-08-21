@@ -1,7 +1,42 @@
-<!doctype html>
-<html lang="en">
-  <head><meta charset="utf-8" /><title>Lazy Witch's Factory — modding</title></head>
-  <body>
-    <h1>Lazy Witch&rsquo;s Factory modding</h1>
-  </body>
-</html>
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Ornament from '../components/Ornament.astro';
+import ModCard from '../components/ModCard.astro';
+import { href } from '../lib/url';
+
+const mods = (await getCollection('mods')).sort((a, b) => a.data.title.localeCompare(b.data.title));
+---
+
+<Base
+  title="Lazy Witch's Factory — modding"
+  description="BepInEx mods and modding guides for Lazy Witch's Factory."
+>
+  <Ornament text="Mods" />
+
+  <p class="lede measure">
+    BepInEx 5 plugins for <b>Lazy Witch&rsquo;s Factory</b>. First time?{' '}
+    <a href={href('install')}>Set up BepInEx</a> before installing any of these.
+  </p>
+
+  <div class="grid">{mods.map((mod) => <ModCard mod={mod} />)}</div>
+
+  <p class="lede measure">
+    Want to make one? Start with <a href={href('guides/first-mod')}>Your first mod</a>.
+  </p>
+</Base>
+
+<style>
+  .lede {
+    margin: 0 auto 2rem;
+    text-align: center;
+  }
+  .lede:last-child {
+    margin: 3rem auto 0;
+  }
+  .grid {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+  }
+</style>

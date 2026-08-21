@@ -185,3 +185,38 @@ test('guides link to their neighbours', () => {
   assert.match(guide.html, /rel="prev"/, 'no previous link');
   assert.match(guide.html, /rel="next"/, 'no next link');
 });
+
+test('the home page leads with mods and points at install', () => {
+  const home = docs.find((d) => d.path === 'index.html');
+  assert.match(home.html, /Custom Difficulty/, 'the home page does not list the mods');
+  assert.match(home.html, /\/lwf-modding\/install\//, 'the home page does not point at install');
+});
+
+test('every mod summary renders on the home page — none depends on a null GitHub description', async () => {
+  // The defect this replaces: the old site rendered mod cards from a GitHub API
+  // `description` field, which is `null` for this repo, so the card's summary
+  // silently came out empty. A negative "no empty <p class=summary>" assertion
+  // can never catch that regression: Astro scoped styles append a hash to the
+  // class attribute (`class="summary astro-XXXXXXXX"`), so a literal
+  // `class="summary"` never matches in the first place and the assertion always
+  // passes, defect or not. Assert positively instead: every mod's own summary
+  // text must actually appear on the built home page.
+  //
+  // This runs under the plain Node test runner, not Astro, so `astro:content`
+  // (a virtual module Astro's own build resolves) is not importable here — read
+  // the same source frontmatter the `mods` collection loads instead.
+  const home = docs.find((d) => d.path === 'index.html');
+  const modsDir = new URL('../mods/', import.meta.url);
+  const files = (await readdir(modsDir)).filter((f) => f.endsWith('.md'));
+  assert.ok(files.length > 0, 'the mods/ directory is empty');
+  for (const file of files) {
+    const raw = await readFile(new URL(file, modsDir), 'utf8');
+    const match = raw.match(/^summary:\s*(.+)$/m);
+    assert.ok(match, `${file} has no summary in its frontmatter`);
+    const summary = match[1].trim().replace(/^"(.*)"$/, '$1');
+    assert.ok(
+      home.html.includes(summary),
+      `home page is missing the summary from ${file}: ${JSON.stringify(summary)}`,
+    );
+  }
+});
