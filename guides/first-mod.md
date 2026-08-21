@@ -4,13 +4,20 @@ blurb: From nothing to a plugin you can see working — project, patch, log, ite
 order: 1
 ---
 
-From nothing to a plugin you can see working, in about fifteen minutes. Every step ends with
-something you can check, so a mistake shows up where it happened rather than three steps later.
+This walks you through building a working mod for Lazy Witch's Factory, from an empty folder to
+a change you can see in the game. It should take about fifteen minutes.
 
-You need the [.NET SDK](https://dotnet.microsoft.com/download) (8 or newer), the game, and
-BepInEx already working — see [Installing mods](/lwf-modding/install/) if it is not.
+Mods for this game are BepInEx plugins written in C#. You don't need to have modded a Unity game
+before, but you should be comfortable running commands in a terminal.
 
-Before you start, open `BepInEx/config/BepInEx.cfg` and set:
+You'll need:
+
+- The [.NET SDK](https://dotnet.microsoft.com/download), version 8 or newer
+- The game, obviously
+- A text editor
+- BepInEx already installed and loading — see [Installing mods](../pages/install.md) if it isn't
+
+Before you start, open `BepInEx/config/BepInEx.cfg` and change two settings:
 
 ```ini
 [Logging.Disk]
@@ -18,29 +25,33 @@ WriteUnityLog = true
 AppendLog = true
 ```
 
-The first sends the game's own exceptions to your log, which you will want the first time
-something throws. The second stops each launch from overwriting the last one's evidence.
+`WriteUnityLog` sends the game's own exceptions to your log, which you'll want the first time
+something crashes. `AppendLog` stops each launch from wiping the previous one's log.
 
-## 1. Make a project
+
+## 1. Set up a project
+
+A plugin is just a class library that references the game's assemblies.
 
 ```bash
-mkdir -p mymod/src/MyMod && cd mymod
+mkdir -p mymod && cd mymod
 dotnet new classlib -o src/MyMod -f netstandard2.1
 rm src/MyMod/Class1.cs
 ```
 
-**`netstandard2.1`, not 2.0.** The game binds `netstandard 2.1.0.0`; 2.0 fails to build with
-`CS1705`.
+**Target `netstandard2.1`, not 2.0.** The game binds `netstandard 2.1.0.0`, and if you target 2.0
+the build fails with `CS1705`.
 
-`Directory.Build.props` in the root — the game path is the only line you edit:
+Create `Directory.Build.props` in the `mymod` folder. This is where the game's path lives, so
+it's the only file you'll need to edit if you move things around:
 
 ```xml
 <Project>
   <PropertyGroup>
     <GameDir>$(HOME)/.local/share/Steam/steamapps/common/Lazy Witch's Factory</GameDir>
 
-    <!-- Located, not named: the full release is LazyWitchsFactory_Data and the demo is
-         LazyWitchFactory_Data. Note the extra s. -->
+    <!-- The full release uses LazyWitchsFactory_Data and the demo uses LazyWitchFactory_Data,
+         so we find the folder instead of naming it. -->
     <GameDataDir>$([System.IO.Directory]::GetDirectories($(GameDir), '*_Data'))</GameDataDir>
     <GameManagedDir>$(GameDataDir)/Managed</GameManagedDir>
     <BepInExCoreDir>$(GameDir)/BepInEx/core</BepInExCoreDir>
@@ -48,9 +59,10 @@ rm src/MyMod/Class1.cs
 </Project>
 ```
 
-On Windows set `<GameDir>C:\Program Files (x86)\Steam\steamapps\common\Lazy Witch's Factory</GameDir>`.
+On Windows, set `GameDir` to something like
+`C:\Program Files (x86)\Steam\steamapps\common\Lazy Witch's Factory`.
 
-Replace `src/MyMod/MyMod.csproj` with:
+Now replace `src/MyMod/MyMod.csproj` with this:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -68,12 +80,14 @@ Replace `src/MyMod/MyMod.csproj` with:
 </Project>
 ```
 
-`Private=false` on every game reference. Without it the build copies the game's assemblies
-next to your DLL, and BepInEx loads those copies instead of the real ones.
+`Assembly-CSharp.dll` is the game's own code — that's what you'll be patching.
+
+**Note:** every game reference needs `Private=false`. Without it the build copies the game's
+assemblies next to your DLL, and BepInEx ends up loading those copies instead of the real ones.
 
 ## 2. Write the plugin
 
-`src/MyMod/Plugin.cs`:
+Create `src/MyMod/Plugin.cs`:
 
 ```csharp
 using BepInEx;
@@ -93,7 +107,11 @@ namespace MyMod
 }
 ```
 
-The GUID must be unique across every plugin installed, so use a domain-ish prefix.
+`Awake` runs once when BepInEx loads your plugin. `PatchAll()` finds every Harmony patch in your
+assembly and applies it — you don't have to register them one by one.
+
+The first argument to `BepInPlugin` is your plugin's GUID, and it has to be unique across every
+mod the player has installed. Something like `dev.yourname.modname` is fine.
 
 ## 3. Build and install
 
@@ -102,27 +120,26 @@ dotnet build -c Release src/MyMod/MyMod.csproj
 cp src/MyMod/bin/Release/netstandard2.1/MyMod.dll "<game>/BepInEx/plugins/"
 ```
 
-## 4. Check it loaded
-
-Run the game to the title screen, quit, then:
+Run the game to the title screen, quit, and check the log:
 
 ```bash
 grep "My Mod" "<game>/BepInEx/LogOutput.log"
 ```
 
-Expected:
+You should see both of these:
 
 ```
 [Info   :   BepInEx] Loading [My Mod 0.1.0]
 [Info   :    My Mod] My Mod loaded.
 ```
 
-Only the first line means `Awake` threw — the exception is in the log just after it. Neither
-line means the DLL is not in `plugins/`, or it targets the wrong framework.
+If you only get the first line, your `Awake` threw an exception — it'll be in the log right
+after. If you get neither, the DLL isn't in `plugins/`, or it's built against the wrong
+framework.
 
-## 5. Change something
+## 4. Actually change something
 
-Add `src/MyMod/DoubleRewards.cs`:
+Time to patch a method. Create `src/MyMod/DoubleRewards.cs`:
 
 ```csharp
 using HarmonyLib;
@@ -138,36 +155,48 @@ namespace MyMod
 }
 ```
 
-Rebuild, copy, run, and open the difficulty selection screen: **Salary** reads `x2.00` where it
-read `x1.00`. The results screen pays it too — both go through this one method.
+`CurrencyParams.GetDifficultyMultiplier` is the game's own method for working out how much a run
+pays. A **postfix** runs straight after the original and can change what it returned — `__result`
+is the return value, and Harmony gives it to you by reference so you can edit it. A **prefix**
+runs before instead, and can skip the original entirely by returning `false`.
 
-A `Postfix` runs after the original and can edit `__result`. A `Prefix` runs before and can skip
-the original by returning `false`.
+Rebuild, copy the DLL over, and open the difficulty selection screen. **Salary** now reads
+`x2.00` instead of `x1.00`, and the results screen pays double at the end of a run — both of them
+call that one method.
 
-## 6. Find your own targets
+That's a complete mod. Everything else is finding better methods to patch.
 
-Decompile the game and read it. It is not obfuscated, so the class and method names are real.
+## 5. Finding your own targets
+
+The game isn't obfuscated, so you can decompile it and read real class and method names.
 
 ```bash
 dotnet tool install -g ilspycmd
 ilspycmd -p -o ./decomp -r "<game>/<data>/Managed" "<game>/<data>/Managed/Assembly-CSharp.dll"
+```
+
+Then just grep for whatever you're after:
+
+```bash
 grep -rn "GetDifficultyMultiplier" ./decomp
 ```
 
-Read the method before patching it. Do not guess a signature — `[HarmonyPatch]` arguments are
-not checked by the compiler, so a wrong one builds cleanly and then binds nothing.
+Read the method before you patch it. The arguments you pass to `[HarmonyPatch]` aren't checked by
+the compiler, so if you get a name or a signature wrong it'll build perfectly and then quietly
+patch nothing.
 
-## 7. Before you trust it
+## Three things that will waste your time
 
-Three things cost more time than everything else combined:
+**Your patch runs but nothing happens.** Mono inlines small methods, and once a method is inlined
+your patch never gets reached — Harmony still reports it as applied. If a patch seems to do
+nothing, this is usually why. Log a value you've read back off the object rather than the value
+you meant to write, so you can tell the difference.
 
-- **A patch that never runs.** Mono inlines small methods, and a patch on an inlined method
-  reports as applied and never fires. Log a value you read back from the object, not the value
-  you meant to write, so the log distinguishes "it worked" from "it was ignored".
-- **A silent Linux install.** No log at all means the launch option in
-  [Installing mods](/lwf-modding/install/) was missed, every time.
-- **A save you cannot undo.** Anything writing progression deserves checking before you run it
-  on a save you care about. Back up `SaveData/` first.
+**Nothing loads on Linux.** It's the launch option, every time — see [Installing mods](../pages/install.md).
 
-Then read the [notes](reference.md) — the architecture, the seams worth patching, and the traps
-found the hard way.
+**You break a save you cared about.** Back up your save folder before running anything that
+touches progression. It lives under
+`compatdata/<appid>/pfx/.../LocalLow/MELTCLOCK/LazyWitchFactory/SaveData/` on Linux.
+
+Once you're comfortable, the [reference](reference.md) cover how the game is put together and the
+traps that took longest to find.

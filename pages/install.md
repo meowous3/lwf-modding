@@ -8,12 +8,15 @@ in a folder.
 
 ## 1. Install BepInEx
 
-Download **[BepInEx 5.4.23.5, `win_x64`](https://github.com/BepInEx/BepInEx/releases/tag/v5.4.23.5)**
-and extract it into the game folder — the one with the `.exe` in it, not a subfolder.
+BepInEx is the mod loader. It hooks into the game at startup and loads any plugin DLLs you've
+put in its `plugins` folder.
 
-Take the Windows build even on Linux. The game runs under Proton, so it is a Windows process.
+Download [BepInEx 5.4.23.5, `win_x64`](https://github.com/BepInEx/BepInEx/releases/tag/v5.4.23.5)
+and extract it into your game folder — the one with `LazyWitchsFactory.exe` in it, not a
+subfolder. If you're on Linux, still grab the Windows build; the game runs through Proton, so
+it's a Windows process either way.
 
-Right afterwards the folder contains:
+When you're done the folder should look like this:
 
 ```
 LazyWitchsFactory.exe
@@ -22,37 +25,36 @@ doorstop_config.ini
 BepInEx/
 ```
 
-**Version matters.** BepInEx 6 is a different loader with a different API. Every mod here
-assumes 5.
-
-## 2. On Linux, set the launch option
-
-Right-click the game in Steam → Properties → Launch Options:
+**Linux users:** right-click the game in Steam, open Properties, and put this in Launch Options:
 
 ```
 WINEDLLOVERRIDES="winhttp=n,b" %command%
 ```
 
-Without it Proton ignores `winhttp.dll` and **nothing loads, with no error** — the game just
-runs unmodded. This is the single most common reason a mod appears to do nothing.
+Without it Proton ignores `winhttp.dll`, so BepInEx never loads and you get no error at all —
+the game just runs unmodded. If a mod seems to do nothing later, come back and check this
+first.
 
-## 3. Run the game once
+**Stick with BepInEx 5.** You might see BepInEx 6 around — that's for IL2CPP games, and this one
+is Mono, so 5 is what you want on Windows and Linux alike. 6 is also still a pre-release and
+can't load BepInEx 5 plugins, so the mods here won't run on it. 5 is in long-term support and
+isn't going anywhere.
 
-Start it, reach the title screen, quit. BepInEx generates its folders on first run:
+## 2. Run the game once
 
-```
-BepInEx/config/     BepInEx/core/     BepInEx/plugins/     BepInEx/LogOutput.log
-```
+Launch the game, get to the title screen, then quit. BepInEx creates its folders the first time
+it runs, and you need `BepInEx/plugins` to exist before you can install anything.
 
-Check it loaded:
+Check that it actually loaded:
 
 ```bash
 grep "Chainloader started" "<game>/BepInEx/LogOutput.log"
 ```
 
-A hit means BepInEx is running. No `LogOutput.log` at all on Linux means step 2 was missed.
+If you get a match, you're good. If there's no `LogOutput.log` at all and you're on Linux, you
+missed the launch option in step 1.
 
-## 4. Install the mod
+## 3. Install the mod
 
 Put its `.dll` in `BepInEx/plugins/`. That is the whole installation. Start the game.
 

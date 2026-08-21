@@ -4,7 +4,7 @@ blurb: The same ground as a working protocol — verify targets by reflection, m
 order: 3
 ---
 
-Protocol and facts. Human version: `reference.md`.
+Protocol and facts. For people: [Your first mod](first-mod.md), [Modding reference](reference.md).
 
 ## Target
 
@@ -35,8 +35,8 @@ API is stable across the demo boundary, but the **content** is not.
 **Decompile before patching.** Unobfuscated. Read the method. Do not infer signatures.
 
 ```bash
-ilspycmd -p -o "$SRC" -r "$GAME/LazyWitchFactory_Data/Managed" \
-  "$GAME/LazyWitchFactory_Data/Managed/Assembly-CSharp.dll"
+MANAGED="$(echo "$GAME"/*_Data/Managed)"
+ilspycmd -p -o "$SRC" -r "$MANAGED" "$MANAGED/Assembly-CSharp.dll"
 ```
 
 **Verify every patch target by reflection before shipping.** `[HarmonyPatch]` arguments are uncheckable at compile time; wrong ones compile clean and then throw at `PatchAll` or bind nothing.
@@ -58,7 +58,17 @@ Resolver takes only the game's `Managed` folder. Adding the host runtime dir →
 
 Mono inlines small methods. Patches on them are installed, reported applied, never reached.
 
-Confirmed: `WinCondition.CalcTargetProgress` (2 lines) no effect; `CurrencyParams.GetDifficultyMultiplier` (guard + dict + fallback) works. Log showed `TargetProgress=5` while a direct field write in the same postfix took effect.
+Measure in IL bytes, not lines:
+
+```csharp
+using var pe = new PEReader(File.OpenRead(assemblyPath));
+pe.GetMethodBody(methodDef.RelativeVirtualAddress).GetILContent().Length
+```
+
+The threshold on this runtime sits **between 12 and 18 bytes**: `WinCondition.CalcTargetProgress`
+(12) is inlined and a patch on it never fires; `WinCondition.IsTimeOver` (18) is not, and a patch
+on it logs. Both measured, both confirmed from a run. Treat anything under ~20 as suspect and
+measure it.
 
 Load-bearing values: write directly, never via a patch on the computing method.
 
@@ -70,10 +80,6 @@ AccessTools.PropertySetter(typeof(T), nameof(T.Prop)).Invoke(instance, new objec
 **An interface call cannot be inlined at the call site.** A 9-byte property reached through
 an interface-typed reference is a safe patch target where the same property called on the
 concrete type is not. Check how the caller is typed before rejecting a small target.
-
-Measured: `WinCondition.IsTimeOver` is **18 bytes and is NOT inlined** on this runtime — the
-threshold sits below 18, not at the ~20 often quoted. Confirmed by a patch on it logging from
-a real run.
 
 No BepInEx/Doorstop setting disables inlining. Untested: `[UnityMono] debug_enabled = true`.
 
@@ -117,6 +123,43 @@ difficulty is included.
 Grep for range guards (`if (difficulty > X) throw`) before choosing values. One such site sits inside an async state machine and needs a transpiler; picking values below the threshold avoids all of them.
 
 **Compiler-generated names carry ordinals** — `<LoadInGame>b__75_0`, `<SceneInitializeAsync>d__44`. Locate by shape at runtime.
+
+## Guarding the save
+
+Progress lives in `LwfGameData.es3` under the Proton prefix for the app id —
+`compatdata/<appid>/pfx/.../LocalLow/MELTCLOCK/LazyWitchFactory/SaveData/`. The demo and the
+full release have separate prefixes. Copy it before running anything that writes.
+
+**Do not enumerate the writers.** `LwfSaveDataAccessor` has 54, all funnelling through a
+private `InvokeSave`. Guarding them by name took three rounds — cleared difficulty, then the
+patron clear, then `SetAdvEpisodeRead`, which feeds the perk conditions and was found by
+playing rather than reading. Each round looked complete.
+
+**Select by body, not by name.** A prefix rule over `Add|Set|Increment|Ensure|Reset|Clear`
+matched 72 methods where there are 54: settings live on the same accessor and persist by a
+different route, so `SetVolume`, `SetScreenResolution` and `SetLocale` were suppressed too, and
+`EnsureInitializedForSave` — the initialiser `InvokeSave` calls — with them. Read each method's
+IL and ask whether it calls the funnel:
+
+```csharp
+PatchProcessor.ReadMethodBody(method)
+    .Any(i => i.Value is MethodBase m && m.Name == "InvokeSave" && m.DeclaringType == accessor)
+```
+
+That keeps what the name rule was reaching for: a writer added upstream is covered because it
+goes through the same funnel, not because someone listed it.
+
+**One prefix covers every signature.** A Harmony prefix returning `false` leaves `__result` at
+its default, which reads correctly here — `Add*`/`Set*` return `false` for "not recorded".
+
+**Block the public writer, not the persist step.** `InvokeSave` mutates in memory and then
+persists; blocking only the persist leaves the change to be flushed by an unrelated save later.
+
+**Scope by lifecycle, and fail toward saving.** Tie the flag to the run object, not to the
+selection. Lower it from more than one place when the natural boundary is inline-sized —
+`WinCondition.Dispose` is 17 bytes — and have a vanilla run *actively* lower it rather than
+merely not raise it. A stuck flag suppressing a real run is worse than the leak it was added
+to close.
 
 ## Probing
 

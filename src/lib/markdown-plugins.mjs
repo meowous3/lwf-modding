@@ -4,6 +4,7 @@ import GithubSlugger from 'github-slugger';
 // `reference.md`. On the site the same guide lives at /guides/reference/, so the hrefs are
 // rewritten at build time rather than the prose being written for one reader and broken
 // for the other.
+const PAGE_MD = /^\.\.\/pages\/([A-Za-z0-9._-]+)\.md(#.*)?$/;
 const SIBLING_MD = /^([A-Za-z0-9._-]+)\.md(#.*)?$/;
 
 export function guideLinks(base) {
@@ -14,6 +15,16 @@ export function guideLinks(base) {
       visit(node) {
         const href = node.properties?.href;
         if (typeof href !== 'string') return;
+        // The install page is not a guide: it lives in pages/ and routes to /install/.
+        // From a guide's directory the github.com-correct path is ../pages/install.md.
+        const page = PAGE_MD.exec(href);
+        if (page) {
+          const [, slug, fragment = ''] = page;
+          return {
+            ...node,
+            properties: { ...node.properties, href: `${base}/${slug}/${fragment}` },
+          };
+        }
         const match = SIBLING_MD.exec(href);
         if (!match) return;
         const [, slug, fragment = ''] = match;
