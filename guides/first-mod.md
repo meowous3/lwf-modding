@@ -15,7 +15,7 @@ folder to a working mod.
 
 ## 1. Create the project
 
-```bash
+```shell
 mkdir mymod
 cd mymod
 dotnet new classlib -o src/MyMod -f netstandard2.1
@@ -87,7 +87,7 @@ the plugin GUID and must be unique across the player's installed mods.
 
 ## 3. Build and install
 
-```bash
+```shell
 dotnet build -c Release src/MyMod/MyMod.csproj
 cp src/MyMod/bin/Release/netstandard2.1/MyMod.dll "<game>/BepInEx/plugins/"
 ```
@@ -129,7 +129,7 @@ both read this method.
 
 The game isn't obfuscated, so decompiled names are the real ones.
 
-```bash
+```shell
 dotnet tool install -g ilspycmd
 ilspycmd -p -o ./decomp -r "<game>/<data>/Managed" "<game>/<data>/Managed/Assembly-CSharp.dll"
 ```

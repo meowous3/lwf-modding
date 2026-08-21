@@ -27,7 +27,7 @@ Reference game assemblies with `Private=false`.
 
 Decompile (unobfuscated):
 
-```bash
+```shell
 ilspycmd -p -o ./src -r "<game>/LazyWitchFactory_Data/Managed" "<game>/LazyWitchFactory_Data/Managed/Assembly-CSharp.dll"
 ```
 
