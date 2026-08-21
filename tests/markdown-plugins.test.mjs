@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { slug as ghSlug } from 'github-slugger';
-import { guideLinks, headingAnchors } from '../src/lib/markdown-plugins.mjs';
+import { guideLinks, headingAnchors, mediaPaths } from '../src/lib/markdown-plugins.mjs';
 
 const visit = guideLinks('/lwf-modding').element.visit;
 const anchor = (href) => ({ type: 'element', tagName: 'a', properties: { href }, children: [] });
@@ -75,4 +75,24 @@ test('generated ids match github-slugger byte-for-byte, including punctuation As
   const node = plugin.element.visit(heading(text), headingCtx);
   assert.equal(node.properties.id, ghSlug(text));
   assert.equal(node.properties.id, 'agent-guide-modding-lazy-witchs-factory');
+});
+
+const img = (src) => ({ type: 'element', tagName: 'img', properties: { src }, children: [] });
+const media = mediaPaths('/lwf-modding').element.visit;
+
+test('prefixes a root-relative image src with the base', () => {
+  assert.equal(media(img('/media/shot.png')).properties.src, '/lwf-modding/media/shot.png');
+});
+
+test('leaves an absolute image src alone', () => {
+  assert.equal(media(img('https://example.com/shot.png')), undefined);
+  assert.equal(media(img('//example.com/shot.png')), undefined);
+});
+
+test('leaves a relative image src alone', () => {
+  assert.equal(media(img('shot.png')), undefined);
+});
+
+test('is safe to run twice', () => {
+  assert.equal(media(img('/lwf-modding/media/shot.png')), undefined);
 });

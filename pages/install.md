@@ -18,6 +18,11 @@ Extract the archive into the game folder — the one containing `LazyWitchsFacto
 subfolder. You should end up with `winhttp.dll`, `doorstop_config.ini` and a `BepInEx` folder
 beside the executable.
 
+To find that folder, right-click the game in Steam and pick **Properties → Installed Files →
+Browse**.
+
+![Steam's game Properties window, with Installed Files selected and the Browse button in the top right](/media/steam-browse.png)
+
 On Linux, add this to the game's Steam launch options:
 
 ```

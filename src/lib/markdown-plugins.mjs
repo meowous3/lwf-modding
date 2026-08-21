@@ -37,6 +37,30 @@ export function guideLinks(base) {
   };
 }
 
+// Markdown authored to read on github.com points at a root-relative `/media/...`, which is
+// where the file sits in `public/`. On Pages the site is served from a base path, so the same
+// src has to be prefixed or it resolves to the domain root and 404s. Same reasoning as
+// `guideLinks`: write it once for both readers and fix it at build time.
+export function mediaPaths(base) {
+  return {
+    name: 'media-paths',
+    element: {
+      filter: ['img'],
+      visit(node) {
+        const src = node.properties?.src;
+        // Protocol-relative (`//host/…`) is absolute, and an src already under the base is
+        // left alone so the plugin is safe to run twice.
+        if (typeof src !== 'string') return;
+        if (!src.startsWith('/') || src.startsWith('//') || src.startsWith(`${base}/`)) return;
+        return {
+          ...node,
+          properties: { ...node.properties, src: `${base}${src}`, loading: 'lazy' },
+        };
+      },
+    },
+  };
+}
+
 // @astrojs/markdown-satteri runs every user hastPlugin BEFORE its own built-in
 // heading-id plugin (see createSatteriMarkdownProcessor: userHastPlugins are
 // pushed ahead of createHeadingIdsPlugin()), so `node.properties.id` is not yet
