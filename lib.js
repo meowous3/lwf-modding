@@ -4,10 +4,12 @@
 const API = 'https://api.github.com';
 const SELF = 'meowous3/lwf-modding';
 const TTL = 10 * 60 * 1000;
+const CACHE = 'v2';   // bump to retire entries cached by an older build
 
 // Unauthenticated GitHub allows 60 requests an hour per address. Caching keeps a few
 // reloads while reading from exhausting it.
 export async function cached(key, fetcher) {
+  key = `${CACHE}:${key}`;
   try {
     const hit = JSON.parse(sessionStorage.getItem(key) || 'null');
     if (hit && Date.now() - hit.at < TTL) return hit.value;
@@ -29,10 +31,47 @@ async function markdown(url) {
 }
 
 export const readme = (repo) =>
-  cached(`readme:${repo}`, () => markdown(`${API}/repos/${repo}/readme`));
+  cached(`readme:${repo}`, async () => absolutise(await markdown(`${API}/repos/${repo}/readme`), repo));
 
 export const guideBody = (file) =>
-  cached(`guide:${file}`, () => markdown(`${API}/repos/${SELF}/contents/${file}`));
+  cached(`guide:${file}`, async () =>
+    absolutise(await markdown(`${API}/repos/${SELF}/contents/${file}`), SELF, dirname(file)));
+
+const dirname = (path) => path.includes('/') ? path.slice(0, path.lastIndexOf('/') + 1) : '';
+
+// GitHub renders relative paths as-is, so a README's `docs/shot.png` would resolve against
+// this site and 404. Rewriting them here keeps every README working unedited — a mod added
+// to mods.json needs nothing done to it.
+//
+// `HEAD` stands in for the default branch, which saves asking what it is called.
+function absolutise(html, repo, base = '') {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const isRelative = (v) => v && !/^(https?:|mailto:|#|\/)/i.test(v);
+
+  doc.querySelectorAll('img[src]').forEach((img) => {
+    const src = img.getAttribute('src');
+    if (isRelative(src)) img.setAttribute('src', `https://raw.githubusercontent.com/${repo}/HEAD/${base}${src}`);
+    img.setAttribute('loading', 'lazy');
+  });
+
+  doc.querySelectorAll('a[href]').forEach((a) => {
+    const href = a.getAttribute('href');
+    if (!isRelative(href)) return;
+
+    // A link between guides stays on this site rather than bouncing to GitHub.
+    const guide = GUIDE_SLUGS.get((base + href).replace(/^\.\//, ''));
+    a.setAttribute('href', guide
+      ? `guide.html?g=${encodeURIComponent(guide)}`
+      : `https://github.com/${repo}/blob/HEAD/${base}${href}`);
+  });
+
+  return doc.body.innerHTML;
+}
+
+// Filled once the guide manifest is read, so cross-links resolve without another fetch.
+const GUIDE_SLUGS = new Map();
+export const registerGuides = (guides) =>
+  guides.forEach((g) => GUIDE_SLUGS.set(g.file, g.slug));
 
 export const manifest = (name) =>
   cached(`manifest:${name}`, async () => (await fetch(`${name}.json`, { cache: 'no-cache' })).json());
