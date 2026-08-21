@@ -121,3 +121,55 @@ test('the install steps are not duplicated in the developer guide', () => {
     'the launch option is still duplicated in guides/first-mod',
   );
 });
+
+const styles = files.filter((f) => f.endsWith('.css'));
+const css = (await Promise.all(styles.map((f) => readFile(f, 'utf8')))).join('\n');
+
+test('body background is painted explicitly, in both schemes', () => {
+  assert.match(css, /prefers-color-scheme:\s*dark/, 'no dark scheme is defined');
+  assert.match(css, /--ground:/, 'the ground token is missing');
+  assert.match(css, /body\{[^}]*background/, 'body has no explicit background');
+});
+
+test('every colour token is defined outside a media query', () => {
+  // A token that exists only inside `@media (prefers-color-scheme: dark)` has no
+  // value at all in the default scheme. Strip every media block, then check that
+  // each token the dark block redefines is still declared in what remains.
+  const outside = css.replace(/@media[^{]*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g, '');
+  const declared = new Set([...outside.matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
+  const inMedia = [...css.matchAll(/@media[^{]*prefers-color-scheme[^{]*\{([\s\S]*?)\n\}/g)]
+    .flatMap((m) => [...m[1].matchAll(/(--[a-z0-9-]+)\s*:/g)].map((t) => t[1]));
+  const orphans = [...new Set(inMedia)].filter((t) => !declared.has(t));
+  assert.deepEqual(orphans, [], 'tokens that exist only inside a media query');
+});
+
+test('the fonts are self-hosted — the built site never calls Google', async () => {
+  const scanned = await Promise.all(
+    scannable.map(async (f) => ({ path: relative(DIST, f), text: await readFile(f, 'utf8') })),
+  );
+  const offenders = scanned
+    .filter((d) => /fonts\.(googleapis|gstatic)\.com|\/\/[^"']*google/.test(d.text))
+    .map((d) => d.path);
+  assert.deepEqual(offenders, [], 'these files would fetch a font from Google');
+  // Astro inlines the @font-face block into each page's <head>, not into a
+  // stylesheet, so this looks at the HTML.
+  const install = docs.find((d) => d.path === 'install/index.html');
+  assert.match(
+    install.html,
+    /@font-face\{[^}]*src:url\("\/lwf-modding\/_astro\/fonts\/[^"]+\.woff2"\)/,
+    'no self-hosted @font-face was emitted',
+  );
+});
+
+test('code blocks carry both Shiki palettes and the CSS consumes them', () => {
+  const guide = docs.find((d) => d.path === 'guides/first-mod/index.html');
+  assert.match(guide.html, /--shiki-light:#[0-9a-fA-F]{3,8}/, 'no light palette on the tokens');
+  assert.match(guide.html, /--shiki-dark:#[0-9a-fA-F]{3,8}/, 'no dark palette on the tokens');
+  assert.match(css, /color:var\(--shiki-light\)/, 'the CSS never reads --shiki-light');
+  assert.match(css, /color:var\(--shiki-dark\)/, 'the CSS never reads --shiki-dark');
+});
+
+test('long lines scroll inside the code block, not the page', () => {
+  assert.match(css, /\.prose pre\{[^}]*overflow-x:auto/, '.prose pre does not scroll its own overflow');
+  assert.match(css, /\.prose table\{[^}]*overflow-x:auto/, '.prose table does not scroll its own overflow');
+});

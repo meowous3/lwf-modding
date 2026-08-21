@@ -1,0 +1,223 @@
+/* ---------------------------------------------------------------------------
+   Lazy Witch's Factory modding — design tokens.
+
+   The language is taken from the game's own UI: dark, generously rounded
+   plaques sitting on a warm taupe parchment ground, each plaque backed by a
+   solid offset layer rather than a soft blur, with a lighter lip along its top
+   edge. Titles are a heavy serif flanked by diamonds over a double rule.
+
+   Every colour is defined on bare :root first. The dark-scheme block below
+   only ever redefines a value — no token exists solely inside a media query.
+   --------------------------------------------------------------------------- */
+
+:root {
+  /* Ground */
+  --ground: #cfc6b8;
+  --ground-edge: #b8ae9e;
+
+  /* Plaques */
+  --surface: #2b2320;
+  --surface-edge: #161110;
+  --surface-lip: #3d332c;
+  --lip-hi: rgba(255, 255, 255, 0.07);
+  /* The hairline that draws the plaque's silhouette. On parchment that is the
+     plaque's own dark edge; on a near-black ground it has to be the lip, or
+     the shape vanishes into the background. */
+  --plaque-ring: #161110;
+
+  /* Ink */
+  --ink: #3a2c22;
+  --ink-inverse: #e8dcc4;
+  --ink-on-surface-muted: #c9baa4;
+  --muted: #8a7a6a;
+  /* --muted is an ornamental stroke colour; it does not clear AA as body text,
+     so quiet *text* gets its own darker token. */
+  --muted-text: #6b5a4b;
+  --rule: rgba(58, 44, 34, 0.34);
+
+  /* Accents */
+  --ember: #9c4430;
+  --ember-fill: #3a1c17;
+  --gold: #8a5a2b;
+  --gold-on-surface: #d1b085;
+
+  /* Geometry */
+  --radius: 11px;
+  --plaque: 6px;
+  --measure: 72ch;
+
+  --font-mono: ui-monospace, 'JetBrains Mono', SFMono-Regular, Menlo, Consolas,
+    'Liberation Mono', monospace;
+
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground: #17120e;
+    --ground-edge: #100c09;
+    --surface: #241d19;
+    --surface-edge: #070504;
+    --surface-lip: #3d332c;
+    --plaque-ring: #40352d;
+    --ink: #e8dcc4;
+    --muted: #ab9683;
+    --muted-text: #b8a48f;
+    --rule: rgba(232, 220, 196, 0.24);
+    --gold: #d1b085;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  /* Grain over a vignette that pools light above centre and falls off to every
+     edge, the way the game's parchment does. The grain is an inline SVG, so
+     the page still makes no network request of any kind. */
+  background-color: var(--ground-edge);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse 105% 78% at 50% 8%, var(--ground) 0%, var(--ground-edge) 100%);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* One rule for links, so nothing anywhere can fall through to browser blue.
+   The only deliberate override is `.on-surface a`, for links on a dark plaque. */
+a {
+  color: var(--gold);
+  text-underline-offset: 3px;
+  text-decoration-thickness: from-font;
+}
+a:hover {
+  color: var(--ember);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ember);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+::selection {
+  background: var(--ember);
+  color: #fff;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display), Georgia, 'Times New Roman', serif;
+  font-weight: 900;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* --- Layout ------------------------------------------------------------- */
+
+.wrap {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  width: 100%;
+}
+
+.measure {
+  max-width: var(--measure);
+}
+
+/* --- The plaque --------------------------------------------------------- */
+
+.panel {
+  background: var(--surface);
+  color: var(--ink-inverse);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  /* top lip, silhouette, then the solid offset slab behind it */
+  box-shadow:
+    inset 0 1px 0 var(--surface-lip),
+    0 0 0 1px var(--plaque-ring),
+    var(--plaque) var(--plaque) 0 var(--surface-edge);
+}
+
+/* Anything sitting on a dark plaque: the one deliberate link override. */
+.on-surface,
+.panel {
+  color: var(--ink-inverse);
+}
+.on-surface a,
+.panel a {
+  color: var(--gold-on-surface);
+}
+.on-surface a:hover,
+.panel a:hover {
+  color: #f0d9b4;
+}
+
+/* --- Buttons ------------------------------------------------------------ */
+
+.btn {
+  display: inline-block;
+  font-family: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  padding: 0.6rem 1.15rem;
+  border-radius: 9px;
+  background: var(--ember-fill);
+  color: var(--ink-inverse);
+  border: 2px solid var(--ember);
+  box-shadow:
+    inset 0 1px 0 var(--lip-hi),
+    3px 3px 0 var(--surface-edge);
+}
+.btn:hover {
+  color: #fff;
+  background: #4a241d;
+}
+.btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: inset 0 1px 0 var(--lip-hi);
+}
+.btn.ghost {
+  background: var(--surface);
+  border-color: var(--surface-lip);
+  color: var(--ink-inverse);
+}
+.btn.ghost:hover {
+  background: #362c27;
+  border-color: var(--muted);
+}
+.btn[aria-disabled='true'],
+.btn:disabled {
+  background: #4b433c;
+  border-color: #5c5249;
+  color: #9b9089;
+  box-shadow: 3px 3px 0 var(--surface-edge);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .btn,
+  .plaque-press {
+    transition:
+      transform 90ms ease,
+      box-shadow 90ms ease,
+      background-color 120ms ease,
+      color 120ms ease;
+  }
+}

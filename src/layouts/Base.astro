@@ -1,0 +1,179 @@
+---
+import { Font } from 'astro:assets';
+import { href } from '../lib/url';
+import '../styles/tokens.css';
+import '../styles/prose.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  wide?: boolean;
+}
+const { title, description, wide = false } = Astro.props;
+
+const home = href('');
+const path = Astro.url.pathname;
+
+const links = [
+  { label: 'Mods', to: home },
+  { label: 'Install', to: href('install') },
+  { label: 'Guides', to: href('guides') },
+  { label: 'GitHub', to: 'https://github.com/meowous3/lwf-modding' },
+];
+
+const current = (to: string) =>
+  to.startsWith('/') && (to === home ? path === to : path.startsWith(to));
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href={href('favicon.svg')} />
+    <Font cssVariable="--font-display" preload />
+    <Font cssVariable="--font-ui" preload />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header>
+      <div class="wrap bar">
+        <a class="brand" href={home}>Lazy Witch&rsquo;s Factory <span>modding</span></a>
+        <nav class="rail panel" aria-label="Site">
+          {
+            links.map((l) => (
+              <a href={l.to} aria-current={current(l.to) ? 'page' : undefined}>
+                {l.label}
+              </a>
+            ))
+          }
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class:list={['wrap', { wide }]}><slot /></main>
+
+    <footer>
+      <div class="wrap">
+        <p>MIT. Not affiliated with the developers of Lazy Witch&rsquo;s Factory.</p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .skip {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    background: var(--surface);
+    color: var(--ink-inverse);
+    padding: 0.6rem 1rem;
+    border-radius: 0 0 var(--radius) 0;
+    z-index: 10;
+  }
+  .skip:focus {
+    left: 0;
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 1.5rem;
+    flex-wrap: wrap;
+    padding-top: 1.35rem;
+    padding-bottom: 1.35rem;
+  }
+
+  .brand {
+    font-family: var(--font-display), Georgia, serif;
+    font-weight: 700;
+    font-size: 1.06rem;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .brand span {
+    color: var(--muted);
+    font-family: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    margin-left: 0.15rem;
+  }
+  .brand:hover span {
+    color: var(--ember);
+  }
+
+  /* The nav is a plaque, like every other piece of chrome in the game's UI. */
+  .rail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15rem;
+    padding: 0.3rem 0.35rem;
+  }
+
+  .rail a {
+    font-weight: 700;
+    font-size: 0.92rem;
+    text-decoration: none;
+    color: var(--ink-on-surface-muted);
+    padding: 0.35rem 0.8rem;
+    border-radius: 7px;
+  }
+  .rail a:hover {
+    color: var(--ink-inverse);
+    background: var(--surface-lip);
+  }
+  .rail a[aria-current='page'] {
+    color: var(--ink-inverse);
+    background: var(--ember-fill);
+    box-shadow: inset 0 0 0 1px var(--ember);
+  }
+
+  main {
+    display: block;
+    padding-bottom: 3rem;
+  }
+  main.wide {
+    max-width: 74rem;
+  }
+
+  footer {
+    margin-top: 3.5rem;
+    padding: 1.5rem 0 2.5rem;
+    color: var(--muted-text);
+    font-size: 0.85rem;
+  }
+  /* The page opens on a double rule and closes on a single tapered one. */
+  footer .wrap::before {
+    content: '';
+    display: block;
+    height: 2px;
+    max-width: 46rem;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--rule) 12%,
+      var(--rule) 88%,
+      transparent 100%
+    );
+  }
+  footer p {
+    margin: 0;
+    text-align: center;
+  }
+
+  @media (max-width: 30rem) {
+    .bar {
+      justify-content: center;
+      text-align: center;
+    }
+  }
+</style>

@@ -1,21 +1,121 @@
 ---
 import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Ornament from '../../components/Ornament.astro';
 import { href } from '../../lib/url';
 
 const guides = (await getCollection('guides')).sort((a, b) => a.data.order - b.data.order);
 ---
-<!doctype html>
-<html lang="en">
-  <head><meta charset="utf-8" /><title>Guides — Lazy Witch's Factory modding</title></head>
-  <body>
-    <h1>Guides</h1>
-    <ul>
-      {guides.map((g) => (
-        <li>
-          <a href={href(`guides/${g.id}`)}>{g.data.title}</a>
-          <p>{g.data.blurb}</p>
+
+<Base
+  title="Guides — Lazy Witch's Factory modding"
+  description="Guides to writing BepInEx mods for Lazy Witch's Factory."
+>
+  <Ornament text="Guides" />
+  <ol class="ladder">
+    {
+      guides.map((g, i) => (
+        <li class="card panel plaque-press">
+          <span class="step" aria-hidden="true">
+            {String(i + 1).padStart(2, '0')}
+          </span>
+          <div class="body">
+            <h2>
+              <a href={href(`guides/${g.id}`)}>{g.data.title}</a>
+            </h2>
+            <p>{g.data.blurb}</p>
+          </div>
         </li>
-      ))}
-    </ul>
-  </body>
-</html>
+      ))
+    }
+  </ol>
+</Base>
+
+<style>
+  /* `order` in the frontmatter is a reading sequence, not a sort key of
+     convenience, so the guides are an <ol> stacked vertically with their
+     numbers showing — the shape of the list carries the same information the
+     numbering does. */
+  .ladder {
+    list-style: none;
+    margin: 0 auto;
+    padding: 0;
+    max-width: 46rem;
+    display: grid;
+    gap: 1.4rem;
+  }
+
+  .card {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    gap: 0 1.25rem;
+    padding: 1.35rem 1.6rem 1.45rem;
+  }
+
+  .step {
+    font-family: var(--font-display), Georgia, serif;
+    font-weight: 900;
+    font-size: 1.55rem;
+    line-height: 1.1;
+    color: var(--gold-on-surface);
+    opacity: 0.7;
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.05em;
+  }
+
+  h2 {
+    margin: 0 0 0.45rem;
+    font-size: 1.3rem;
+    line-height: 1.2;
+  }
+
+  h2 a {
+    color: var(--ink-inverse);
+    text-decoration: none;
+  }
+
+  /* The whole plaque is the target; the link keeps the accessible name. */
+  h2 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+  }
+
+  .card p {
+    margin: 0;
+    color: var(--ink-on-surface-muted);
+    font-size: 0.95rem;
+  }
+
+  .card:hover,
+  .card:focus-within {
+    transform: translate(3px, 3px);
+    box-shadow:
+      inset 0 1px 0 var(--surface-lip),
+      0 0 0 1px var(--plaque-ring),
+      3px 3px 0 var(--surface-edge);
+  }
+
+  .card:hover .step,
+  .card:focus-within .step {
+    opacity: 1;
+  }
+
+  .card:hover h2 a,
+  .card:focus-within h2 a {
+    color: #fff;
+  }
+
+  @media (max-width: 28rem) {
+    .card {
+      grid-template-columns: 1fr;
+      gap: 0.3rem;
+    }
+    .step {
+      font-size: 1.05rem;
+    }
+  }
+</style>
