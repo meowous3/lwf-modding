@@ -244,6 +244,21 @@ test('every mod summary renders on the home page — none depends on a null GitH
   }
 });
 
+test('the /mods/ index lists every mod', async () => {
+  const index = docs.find((d) => d.path === 'mods/index.html');
+  assert.ok(index, 'mods/index.html was not built');
+  const modsDir = new URL('../mods/', import.meta.url);
+  const files = (await readdir(modsDir)).filter((f) => f.endsWith('.md'));
+  assert.ok(files.length > 0, 'the mods/ directory is empty');
+  for (const file of files) {
+    const raw = await readFile(new URL(file, modsDir), 'utf8');
+    const match = raw.match(/^title:\s*(.+)$/m);
+    assert.ok(match, `${file} has no title in its frontmatter`);
+    const title = match[1].trim().replace(/^"(.*)"$/, '$1');
+    assert.ok(index.html.includes(title), `/mods/ is missing ${file}'s title: ${JSON.stringify(title)}`);
+  }
+});
+
 test('old URLs redirect rather than 404', () => {
   for (const [file, target] of [
     ['mods.html', '/lwf-modding/'],

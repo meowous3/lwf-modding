@@ -16,7 +16,8 @@ folder to a working mod.
 ## 1. Create the project
 
 ```bash
-mkdir mymod && cd mymod
+mkdir mymod
+cd mymod
 dotnet new classlib -o src/MyMod -f netstandard2.1
 rm src/MyMod/Class1.cs
 ```
@@ -131,8 +132,23 @@ The game isn't obfuscated, so decompiled names are the real ones.
 ```bash
 dotnet tool install -g ilspycmd
 ilspycmd -p -o ./decomp -r "<game>/<data>/Managed" "<game>/<data>/Managed/Assembly-CSharp.dll"
+```
+
+:::tabs
+
+**Windows**
+
+```powershell
+Get-ChildItem -Recurse ./decomp | Select-String "GetDifficultyMultiplier"
+```
+
+**Linux / macOS**
+
+```bash
 grep -rn "GetDifficultyMultiplier" ./decomp
 ```
+
+:::
 
 Read a method before patching it. `[HarmonyPatch]` arguments aren't compiler-checked, so a wrong
 name or signature builds clean and patches nothing.

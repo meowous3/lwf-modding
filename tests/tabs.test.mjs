@@ -104,3 +104,24 @@ test('the site still ships no JavaScript of its own', () => {
     'the install page grew a <script> — tab switching is meant to be CSS only',
   );
 });
+
+const firstMod = await readFile(join(DIST, 'guides/first-mod/index.html'), 'utf8');
+const guidePanes = firstMod.split('<section class="tabs-pane"').slice(1);
+
+test('the "find your own targets" guide step renders a tab group with both panes', () => {
+  assert.equal((firstMod.match(/<div class="tabs">/g) ?? []).length, 1);
+  assert.equal(guidePanes.length, 2, 'a tab group needs both panes in the HTML');
+  const [windows, linux] = guidePanes.map(text);
+  assert.match(windows, /data-tab="windows"/);
+  assert.match(linux, /data-tab="linux-macos"/);
+  assert.ok(
+    windows.includes('Get-ChildItem -Recurse ./decomp | Select-String "GetDifficultyMultiplier"'),
+    'the Windows pane is missing the Get-ChildItem/Select-String command',
+  );
+  assert.ok(
+    linux.includes('grep -rn "GetDifficultyMultiplier" ./decomp'),
+    'the Linux/macOS pane is missing the grep command',
+  );
+  assert.ok(!windows.includes('grep '), 'the Windows pane leaked the grep command');
+  assert.ok(!linux.includes('Select-String'), 'the Linux/macOS pane leaked the PowerShell command');
+});

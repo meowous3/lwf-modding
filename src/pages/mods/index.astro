@@ -1,0 +1,24 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Ornament from '../../components/Ornament.astro';
+import ModCard from '../../components/ModCard.astro';
+
+const mods = (await getCollection('mods')).sort((a, b) => a.data.title.localeCompare(b.data.title));
+---
+
+<Base
+  title="Mods — Lazy Witch's Factory modding"
+  description="BepInEx mods for Lazy Witch's Factory."
+>
+  <Ornament text="Mods" />
+  <div class="grid">{mods.map((mod) => <ModCard mod={mod} />)}</div>
+</Base>
+
+<style>
+  .grid {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+  }
+</style>
