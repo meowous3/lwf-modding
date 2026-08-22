@@ -51,7 +51,10 @@ const { Content, headings } = isAgents ? { Content: null, headings: [] } : await
     padding: 1rem 1.15rem 1.05rem;
     margin: 0;
     max-width: 100%;
-    overflow-x: auto;
+    /* Wrap rather than scroll: this page is read as a whole document, and a
+       line that runs off the right edge is a line the reader will miss. */
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
     font-family: var(--font-mono);
     font-size: 0.86rem;
     line-height: 1.6;

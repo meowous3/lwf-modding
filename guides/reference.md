@@ -4,8 +4,8 @@ blurb: Various patching methods. This page will eventually be superseded by a wi
 order: 2
 ---
 
-What the game is made of and where it gives way. Assumes a plugin that already loads — if you
-do not have one yet, start with [Your first mod](first-mod.md).
+How the game is built, and which methods are worth patching. Assumes a plugin that already
+loads. If you do not have one yet, start with [Your first mod](first-mod.md).
 
 Unity 6000.0.80f1, Mono, x64. Steam app `3971650` (demo: `4638750`).
 
@@ -13,23 +13,18 @@ Derived from `0.21.0` and `0.20.1`; class and member names may shift between ver
 
 ## Setup
 
-BepInEx **5.4.23.5**, **win_x64** build.
+Installing BepInEx is covered in [Installing mods](../pages/install.md).
 
-Linux Steam launch options:
+Plugins target **netstandard2.1**. Reference game assemblies with `Private=false`.
 
-```
-WINEDLLOVERRIDES="winhttp=n,b" %command%
-```
-
-Plugins target **netstandard2.1**. 2.0 fails with `CS1705`.
-
-Reference game assemblies with `Private=false`.
-
-Decompile (unobfuscated):
+The assemblies are unobfuscated. Decompile them with:
 
 ```shell
-ilspycmd -p -o ./src -r "<game>/LazyWitchFactory_Data/Managed" "<game>/LazyWitchFactory_Data/Managed/Assembly-CSharp.dll"
+ilspycmd -p -o ./src -r "<game>/LazyWitchsFactory_Data/Managed" "<game>/LazyWitchsFactory_Data/Managed/Assembly-CSharp.dll"
 ```
+
+`<game>` is the folder containing `LazyWitchsFactory.exe`. The demo's data folder is
+`LazyWitchFactory_Data`, without the `s`.
 
 ## Architecture
 

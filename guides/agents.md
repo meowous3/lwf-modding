@@ -127,8 +127,9 @@ Grep for range guards (`if (difficulty > X) throw`) before choosing values. One 
 ## Guarding the save
 
 Progress lives in `LwfGameData.es3` under the Proton prefix for the app id —
-`compatdata/<appid>/pfx/.../LocalLow/MELTCLOCK/LazyWitchFactory/SaveData/`. The demo and the
-full release have separate prefixes. Copy it before running anything that writes.
+`compatdata/<appid>/pfx/.../LocalLow/MELTCLOCK/LazyWitchsFactory/SaveData/`. The demo drops the
+`s`: `MELTCLOCK/LazyWitchFactory/SaveData/`. The demo and the full release have separate
+prefixes. Copy it before running anything that writes.
 
 **Do not enumerate the writers.** `LwfSaveDataAccessor` has 54, all funnelling through a
 private `InvokeSave`. Guarding them by name took three rounds — cleared difficulty, then the
