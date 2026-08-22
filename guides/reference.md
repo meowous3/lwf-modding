@@ -1,6 +1,6 @@
 ---
 title: Modding reference
-blurb: How the game is put together, and which methods are worth patching.
+blurb: Various patching methods. This page will eventually be superseded by a wiki.
 order: 2
 ---
 

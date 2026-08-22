@@ -1,6 +1,6 @@
 ---
 title: Your first mod
-blurb: Build a working mod, from an empty folder to a change you can see in the game.
+blurb: How to build a working mod from scratch.
 order: 1
 ---
 
@@ -21,8 +21,6 @@ cd mymod
 dotnet new classlib -o src/MyMod -f netstandard2.1
 rm src/MyMod/Class1.cs
 ```
-
-Target `netstandard2.1`. The game binds `netstandard 2.1.0.0`, and 2.0 fails with `CS1705`.
 
 `Directory.Build.props`, where the game path lives:
 
