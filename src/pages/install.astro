@@ -12,6 +12,8 @@ const { Content } = await render(install);
   title={`${install.data.title} — Lazy Witch's Factory modding`}
   description={install.data.summary}
 >
-  <Ornament text={install.data.title} lead={install.data.summary} />
+  {/* No lead: summary restates the procedure printed directly below it.
+      It is still the page description in <head>. */}
+  <Ornament text={install.data.title} />
   <article class="prose"><Content /></article>
 </Base>
