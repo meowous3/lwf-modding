@@ -1,6 +1,6 @@
 ---
 title: Your first mod
-blurb: From nothing to a plugin you can see working — project, patch, log, iterate.
+blurb: Build a working mod, from an empty folder to a change you can see in the game.
 order: 1
 ---
 

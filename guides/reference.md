@@ -1,6 +1,6 @@
 ---
 title: Modding reference
-blurb: What the game is made of and where it gives way — architecture, the seams worth patching, and the traps found the hard way.
+blurb: How the game is put together, and which methods are worth patching.
 order: 2
 ---
 

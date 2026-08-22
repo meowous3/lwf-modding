@@ -1,6 +1,6 @@
 ---
 title: Agent protocol
-blurb: The same ground as a working protocol — verify targets by reflection, measure before patching, log applied values.
+blurb: Conventions for coding agents writing mods for this game.
 order: 3
 ---
 
