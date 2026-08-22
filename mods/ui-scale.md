@@ -3,7 +3,7 @@ title: UI Scale
 repo: meowous3/lwf-ui-scale
 dll: LwfUiScale.dll
 summary: A UI Scale slider in Graphic settings, 15% to 200%.
-gameVersion: "0.21.0"
+gameVersion: "0.22.0"
 screenshot: mods/ui-scale.png
 screenshotAlt: The Graphic settings page with a UI Scale slider below Frame Rate Control
 ---

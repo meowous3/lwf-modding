@@ -3,7 +3,7 @@ title: Custom Difficulty
 repo: meowous3/lwf-custom-difficulty
 dll: LwfCustomDifficulty.dll
 summary: A difficulty whose time limit, repayments, growth curve and taxes you set in-game.
-gameVersion: "0.21.0"
+gameVersion: "0.22.0"
 screenshot: mods/custom-difficulty.png
 screenshotAlt: The difficulty screen with the Custom options panel beside the Custom card
 ---
