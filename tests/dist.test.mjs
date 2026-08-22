@@ -152,6 +152,24 @@ test('the install page still names the game folder and the plugins folder', () =
   assert.match(text, /BepInEx\/plugins/, 'the install page no longer names the plugins folder');
 });
 
+// The release's save folder is `LazyWitchsFactory`; the demo's is `LazyWitchFactory`.
+// The guide once printed the demo's name for a back-up instruction, which fails
+// silently and loses the save. Pin the release spelling so it cannot come back.
+test('the developer guide names the release save folder, not the demo one', () => {
+  const firstMod = docs.find((d) => d.path === 'guides/first-mod/index.html');
+  assert.ok(firstMod, 'guides/first-mod/index.html was not built');
+  const text = firstMod.html.replace(/<[^>]+>/g, '');
+  assert.match(
+    text,
+    /MELTCLOCK[\\/]+LazyWitchsFactory[\\/]+SaveData/,
+    'the guide no longer points at MELTCLOCK/LazyWitchsFactory/SaveData',
+  );
+  assert.ok(
+    !/MELTCLOCK[\\/]+LazyWitchFactory\b/.test(text),
+    "the guide points at the demo's save folder, LazyWitchFactory without the s",
+  );
+});
+
 test('the install steps are not duplicated in the developer guide', () => {
   const firstMod = docs.find((d) => d.path === 'guides/first-mod/index.html');
   assert.ok(

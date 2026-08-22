@@ -11,7 +11,7 @@ folder to a working mod.
 ## Requirements
 
 - [.NET SDK](https://dotnet.microsoft.com/download) 8 or newer
-- BepInEx already set up — see [Installing mods](../pages/install.md)
+- BepInEx already set up. See [Installing mods](../pages/install.md).
 
 ## 1. Create the project
 
@@ -22,11 +22,12 @@ dotnet new classlib -o src/MyMod -f netstandard2.1
 rm src/MyMod/Class1.cs
 ```
 
-`Directory.Build.props`, where the game path lives:
+`mymod/Directory.Build.props`:
 
 ```xml
 <Project>
   <PropertyGroup>
+    <!-- Windows: C:/Program Files (x86)/Steam/steamapps/common/Lazy Witch's Factory -->
     <GameDir>$(HOME)/.local/share/Steam/steamapps/common/Lazy Witch's Factory</GameDir>
 
     <!-- Full release: LazyWitchsFactory_Data. Demo: LazyWitchFactory_Data. -->
@@ -36,6 +37,8 @@ rm src/MyMod/Class1.cs
   </PropertyGroup>
 </Project>
 ```
+
+Set `GameDir` to the folder containing `LazyWitchsFactory.exe`.
 
 `src/MyMod/MyMod.csproj`:
 
@@ -85,12 +88,19 @@ the plugin GUID and must be unique across the player's installed mods.
 
 ## 3. Build and install
 
+Back up your save folder before you run the game with a mod installed.
+
+- Windows: `%USERPROFILE%\AppData\LocalLow\MELTCLOCK\LazyWitchsFactory\SaveData`
+- Linux: `~/.local/share/Steam/steamapps/compatdata/3971650/pfx/drive_c/users/steamuser/AppData/LocalLow/MELTCLOCK/LazyWitchsFactory/SaveData`
+
+Replace `<game>` with the path to the game folder.
+
 ```shell
 dotnet build -c Release src/MyMod/MyMod.csproj
 cp src/MyMod/bin/Release/netstandard2.1/MyMod.dll "<game>/BepInEx/plugins/"
 ```
 
-Run the game, quit, and check the log for both lines:
+Run the game, quit, and check `<game>/BepInEx/LogOutput.log` for both lines:
 
 ```
 [Info   :   BepInEx] Loading [My Mod 0.1.0]
@@ -120,8 +130,8 @@ namespace MyMod
 A postfix runs after the original and can edit `__result`, its return value. A prefix runs
 before, and returning `false` skips the original.
 
-Rebuild, copy, launch. **Salary** on the difficulty screen reads `x2.00`, and runs pay double —
-both read this method.
+Rebuild, copy, and launch. The reward multiplier on the difficulty screen shows twice its usual
+value, and runs pay double. Both read this method.
 
 ## 5. Find your own targets
 
@@ -129,7 +139,7 @@ The game isn't obfuscated, so decompiled names are the real ones.
 
 ```shell
 dotnet tool install -g ilspycmd
-ilspycmd -p -o ./decomp -r "<game>/<data>/Managed" "<game>/<data>/Managed/Assembly-CSharp.dll"
+ilspycmd -p -o ./decomp -r "<game>/LazyWitchsFactory_Data/Managed" "<game>/LazyWitchsFactory_Data/Managed/Assembly-CSharp.dll"
 ```
 
 :::tabs
@@ -153,12 +163,22 @@ name or signature builds clean and patches nothing.
 
 ## Troubleshooting
 
+**`error MSB4184` from `Directory.Build.props`.** `GameDir` names a folder that does not exist. The
+path quoted in the message is `GameDir` appended to the project directory, which is why it reads
+as nonsense. Set `GameDir` to the folder containing `LazyWitchsFactory.exe`.
+
+**`error CS0246`, eight times.** Every one says `The type or namespace name 'BepInEx' could not be
+found`. BepInEx is not installed in the game folder. Nothing in the build output names the path it
+looked in, and no missing-reference warning is issued. Work through
+[Installing mods](../pages/install.md), then build again.
+
+**`error CS1705`.** The project targets `netstandard2.0`. `Assembly-CSharp` is built against
+`netstandard2.1` and cannot be referenced from a 2.0 project. Set `TargetFramework` to
+`netstandard2.1`.
+
 **The patch applies but nothing changes.** Mono inlines small methods, and a patch on an inlined
 method never runs while still reporting as applied. Log a value read back off the object rather
 than the one you meant to write.
-
-**Back up your save** before running anything that touches progression. On Linux it's under
-`compatdata/<appid>/pfx/.../LocalLow/MELTCLOCK/LazyWitchFactory/SaveData/`.
 
 ## Further reading
 
