@@ -172,10 +172,6 @@ found`. BepInEx is not installed in the game folder. Nothing in the build output
 looked in, and no missing-reference warning is issued. Work through
 [Installing mods](../pages/install.md), then build again.
 
-**`error CS1705`.** The project targets `netstandard2.0`. `Assembly-CSharp` is built against
-`netstandard2.1` and cannot be referenced from a 2.0 project. Set `TargetFramework` to
-`netstandard2.1`.
-
 **The patch applies but nothing changes.** Mono inlines small methods, and a patch on an inlined
 method never runs while still reporting as applied. Log a value read back off the object rather
 than the one you meant to write.
